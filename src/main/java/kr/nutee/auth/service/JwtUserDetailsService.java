@@ -1,7 +1,7 @@
-package com.quadcore.auth.service;
+package kr.nutee.auth.service;
 
-import com.quadcore.auth.Domain.Member;
-import com.quadcore.auth.Repository.MemberRepository;
+import kr.nutee.auth.Domain.Member;
+import kr.nutee.auth.Repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

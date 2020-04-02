@@ -1,4 +1,4 @@
-package com.quadcore.auth.Domain;
+package kr.nutee.auth.Domain;
 
 import lombok.Data;
 

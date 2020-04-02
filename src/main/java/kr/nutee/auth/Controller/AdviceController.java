@@ -1,4 +1,4 @@
-package com.quadcore.auth.Controller;
+package kr.nutee.auth.Controller;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import org.slf4j.Logger;

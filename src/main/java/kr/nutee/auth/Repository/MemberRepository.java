@@ -1,6 +1,6 @@
-package com.quadcore.auth.Repository;
+package kr.nutee.auth.Repository;
 
-import com.quadcore.auth.Domain.Member;
+import kr.nutee.auth.Domain.Member;
 import org.springframework.data.repository.CrudRepository;
 
 public interface MemberRepository extends CrudRepository<Member, Integer> {

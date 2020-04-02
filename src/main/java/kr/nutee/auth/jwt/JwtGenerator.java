@@ -1,4 +1,4 @@
-package com.quadcore.auth.jwt;
+package kr.nutee.auth.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

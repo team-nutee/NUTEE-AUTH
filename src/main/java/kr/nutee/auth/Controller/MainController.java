@@ -1,10 +1,10 @@
-package com.quadcore.auth.Controller;
+package kr.nutee.auth.Controller;
 
-import com.quadcore.auth.Domain.Member;
+import kr.nutee.auth.Domain.Member;
 
-import com.quadcore.auth.Repository.MemberRepository;
-import com.quadcore.auth.jwt.JwtGenerator;
-import com.quadcore.auth.service.JwtUserDetailsService;
+import kr.nutee.auth.Repository.MemberRepository;
+import kr.nutee.auth.jwt.JwtGenerator;
+import kr.nutee.auth.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,20 +13,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 import javax.transaction.Transactional;
 import java.nio.charset.StandardCharsets;

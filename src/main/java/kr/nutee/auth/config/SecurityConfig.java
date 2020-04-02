@@ -1,4 +1,4 @@
-package com.quadcore.auth.config;
+package kr.nutee.auth.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

@@ -1,6 +1,6 @@
-package com.quadcore.auth.jwt;
+package kr.nutee.auth.jwt;
 
-import com.quadcore.auth.service.JwtUserDetailsService;
+import kr.nutee.auth.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;

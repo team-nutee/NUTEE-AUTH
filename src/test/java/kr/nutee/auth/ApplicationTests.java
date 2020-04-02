@@ -1,10 +1,10 @@
-package com.quadcore.auth;
+package kr.nutee.auth;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AuthApplicationTests {
+class ApplicationTests {
 
     @Test
     void contextLoads() {

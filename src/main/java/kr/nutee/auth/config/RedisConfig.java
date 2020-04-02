@@ -1,8 +1,7 @@
-package com.quadcore.auth.config;
+package kr.nutee.auth.config;
 
 
-import com.quadcore.auth.Domain.Member;
-import com.quadcore.auth.Domain.Token;
+import kr.nutee.auth.Domain.Member;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
