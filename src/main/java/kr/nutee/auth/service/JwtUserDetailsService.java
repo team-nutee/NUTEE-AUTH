@@ -1,11 +1,10 @@
 package kr.nutee.auth.service;
 
-import kr.nutee.auth.Domain.Member;
-import kr.nutee.auth.Repository.MemberRepository;
+import kr.nutee.auth.Domain.User;
+import kr.nutee.auth.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,25 +17,23 @@ import java.util.List;
 public class JwtUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private MemberRepository repository;
+    private UserRepository repository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Member member = repository.findByNickname(username);
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        User user = repository.findByUserId(userId);
 
         List<GrantedAuthority> roles = new ArrayList<>();
 
-        if (member == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with userId: " + userId);
         }
-        if (member.getGrade() == 0) {
-            roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        if (user.getRole() == 0) {
             roles.add(new SimpleGrantedAuthority("ROLE_USER"));
         } else {
-            roles.add(new SimpleGrantedAuthority("ROLE_USER"));
-            roles.add(new SimpleGrantedAuthority("ROLE_HI"));
+            roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
-        return new User(member.getNickname(), member.getPassword(), roles);
+        return new org.springframework.security.core.userdetails.User(user.getNickname(), user.getPassword(), roles);
     }
 
 }

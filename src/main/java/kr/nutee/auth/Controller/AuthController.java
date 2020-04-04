@@ -1,29 +1,22 @@
 package kr.nutee.auth.Controller;
 
-import kr.nutee.auth.Domain.Member;
-
-import kr.nutee.auth.Repository.MemberRepository;
+import kr.nutee.auth.Domain.User;
+import kr.nutee.auth.Repository.UserRepository;
 import kr.nutee.auth.jwt.JwtGenerator;
 import kr.nutee.auth.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
-import lombok.AllArgsConstructor;
+import kr.nutee.auth.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -36,7 +29,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
+    private final UserService userService;
     private final RedisTemplate<String, Object> memberRedisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtUserDetailsService userDetailsService;
@@ -48,6 +42,11 @@ public class AuthController {
     public String test() {
         log.info("test");
         return "TEST";
+    }
+
+    @PostMapping(path="/signup")
+    public User signUp(@RequestBody User user) {
+        return userService.insertUser(user);
     }
 
 
@@ -231,16 +230,16 @@ public class AuthController {
 //    }
 
 
-    @PostMapping(path="/checkemail")
-    public Map<String, Object>  checkEmail (@RequestBody Map<String, String> m) {
-        Map<String, Object> map = new HashMap<>();
-        System.out.println("이메일체크 요청 이메일: " + m.get("email"));
-        if (memberRepository.findBySchoolEmail(m.get("email")) == null) {
-            map.put("errorCode", 10);
-        }
-        else map.put("errorCode", 53);
-        return map;
-    }
+//    @PostMapping(path="/checkemail")
+//    public Map<String, Object>  checkEmail (@RequestBody Map<String, String> m) {
+//        Map<String, Object> map = new HashMap<>();
+//        System.out.println("이메일체크 요청 이메일: " + m.get("email"));
+//        if (userRepository.findBySchoolEmail(m.get("email")) == null) {
+//            map.put("errorCode", 10);
+//        }
+//        else map.put("errorCode", 53);
+//        return map;
+//    }
 
 
     @PostMapping(path="/refresh")
