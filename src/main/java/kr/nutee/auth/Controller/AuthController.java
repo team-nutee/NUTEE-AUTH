@@ -6,6 +6,9 @@ import kr.nutee.auth.Repository.MemberRepository;
 import kr.nutee.auth.jwt.JwtGenerator;
 import kr.nutee.auth.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,32 +32,21 @@ import java.util.concurrent.TimeUnit;
 
 
 @RestController
-@RequestMapping
-public class MainController {
-    private Logger logger = LoggerFactory.getLogger(ApplicationRunner.class);
-    @Autowired
-    private MemberRepository memberRepository;
+@RequestMapping(path = "/auth")
+@RequiredArgsConstructor
+@Slf4j
+public class AuthController {
+    private final MemberRepository memberRepository;
+    private final RedisTemplate<String, Object> memberRedisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final JwtUserDetailsService userDetailsService;
+    private final JwtGenerator jwtGenerator;
+    private final AuthenticationManager am;
+    private final PasswordEncoder bcryptEncoder;
 
-    @Autowired
-    RedisTemplate<String, Object> memberRedisTemplate;
-
-    @Autowired
-    StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
-    private JwtUserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtGenerator jwtGenerator;
-    @Autowired
-    private AuthenticationManager am;
-
-    @Autowired
-    private PasswordEncoder bcryptEncoder;
-
-
-    @PostMapping(path="/auth/testing")
+    @PostMapping(path="/testing")
     public String test() {
+        log.info("test");
         return "TEST";
     }
 
@@ -75,6 +67,7 @@ public class MainController {
         }
         return generatedPassword;
     }
+
     @Value("${my.ip}")
     private String myIp;
 
@@ -136,11 +129,11 @@ public class MainController {
 //    }
 
     //verify email to set new password
-    @GetMapping(path="/auth/vfpwemail")
+    @GetMapping(path="/vfpwemail")
     public Map<String, Integer> changePassword(@RequestParam("username") String username, @RequestParam("key") String hash) {
         Map<String, Integer> m = new HashMap<>();
-        logger.info("redis get : " + stringRedisTemplate.opsForValue().get("changepw-"+username));
-        logger.info("hash : " + hash);
+        log.info("redis get : " + stringRedisTemplate.opsForValue().get("changepw-"+username));
+        log.info("hash : " + hash);
         if (stringRedisTemplate.opsForValue().get("changepw-"+username).equals(hash)) {
             stringRedisTemplate.delete("changepw-"+username);
             m.put("errorCode", 10);
@@ -206,41 +199,39 @@ public class MainController {
 //        return map;
 //    }
 
-    @PostMapping(path = "/auth/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> m) throws Exception {
-        Map<String, Object> map = new HashMap<>();
-        final String nickname = m.get("username");
-        logger.info("test input username: " + nickname);
-
-        Member member = memberRepository.findByNickname(nickname);
-
-        if (stringRedisTemplate.opsForValue().get("email-"+nickname) != null) {
-            map.put("errorCode", 69);
-            return map;
-        }
-
-
-        member.setAccessAt(new Date());
-        memberRepository.save(member);
-        am.authenticate(new UsernamePasswordAuthenticationToken(nickname, m.get("password")));
-
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(nickname);
-        final String accessToken = jwtGenerator.generateAccessToken(userDetails);
-        final String refreshToken = jwtGenerator.generateRefreshToken(nickname);
-
-        //generate Token and save in redis
-        stringRedisTemplate.opsForValue().set("refresh-" + nickname, refreshToken);
-
-        logger.info("generated access token: " + accessToken);
-        logger.info("generated refresh token: " + refreshToken);
-        map.put("errorCode", 10);
-        map.put("accessToken", accessToken);
-        map.put("refreshToken", refreshToken);
-        return map;
-    }
+//    @PostMapping(path = "/login")
+//    public HashMap<String, Object> login(@RequestBody HashMap<String, Object> map) throws Exception {
+//        final String userId = map.get("nickname");
+//        logger.info("test input username: " + userId);
+//
+//        Member member = memberRepository.findByNickname(userId);
+//
+//        if (stringRedisTemplate.opsForValue().get("email-"+userId) != null) {
+//            map.put("errorCode", 69);
+//            return map;
+//        }
+//
+//        member.setAccessAt(new Date());
+//        memberRepository.save(member);
+//        am.authenticate(new UsernamePasswordAuthenticationToken(userId, map.get("password")));
+//
+//        final UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+//        final String accessToken = jwtGenerator.generateAccessToken(userDetails);
+//        final String refreshToken = jwtGenerator.generateRefreshToken(userId);
+//
+//        //generate Token and save in redis
+//        stringRedisTemplate.opsForValue().set("refresh-" + userId, refreshToken);
+//
+//        logger.info("generated access token: " + accessToken);
+//        logger.info("generated refresh token: " + refreshToken);
+//        map.put("errorCode", 10);
+//        map.put("accessToken", accessToken);
+//        map.put("refreshToken", refreshToken);
+//        return map;
+//    }
 
 
-    @PostMapping(path="/auth/checkemail")
+    @PostMapping(path="/checkemail")
     public Map<String, Object>  checkEmail (@RequestBody Map<String, String> m) {
         Map<String, Object> map = new HashMap<>();
         System.out.println("이메일체크 요청 이메일: " + m.get("email"));
@@ -252,25 +243,25 @@ public class MainController {
     }
 
 
-    @PostMapping(path="/auth/refresh")
+    @PostMapping(path="/refresh")
     public Map<String, Object>  requestForNewAccessToken(@RequestBody Map<String, String> m) {
         String username = null;
         Map<String, Object> map = new HashMap<>();
         String expiredAccessToken = m.get("accessToken");
         String refreshToken = m.get("refreshToken");
-        logger.info("get expired access token: " + expiredAccessToken);
+        log.info("get expired access token: " + expiredAccessToken);
 
         try {
             username = jwtGenerator.getUsernameFromToken(expiredAccessToken);
         } catch (ExpiredJwtException e) {
             username = e.getClaims().getSubject();
-            logger.info("username from expired access token: " + username);
+            log.info("username from expired access token: " + username);
         }
         if (username == null) throw new IllegalArgumentException();
 
 
         String refreshTokenFromDb = stringRedisTemplate.opsForValue().get("refresh-"+username);
-        logger.info("rtfrom db: " + refreshTokenFromDb);
+        log.info("rtfrom db: " + refreshTokenFromDb);
 
         //user refresh token doesnt match with cache
         if (!refreshToken.equals(refreshTokenFromDb)) {
@@ -291,39 +282,14 @@ public class MainController {
         return map;
     }
 
-    @GetMapping(path="/user/normal")
+    @GetMapping(path="/normal")
     public Map<String, Object> onlyNormal() {
         Map<String, Object> map = new HashMap<>();
         map.put("errorCode", 10);
         return map;
     }
 
-
-    @Transactional
-    @PostMapping(path="/admin/deleteuser")
-    public Map<String, Object> deleteUser (@RequestBody Map<String, String> m) {
-        Map<String, Object> map = new HashMap<>();
-        String username = m.get("username");
-        Long result = memberRepository.deleteByNickname(username);
-        logger.info("delete result: " + result);
-
-        stringRedisTemplate.delete("refresh-"+ username);
-        map.put("errorCode", 10);
-        return map;
-    }
-
-
-
-    @GetMapping(path="/admin/getusers")
-    public Map<String, Object> getAllUsers() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("errorCode", 10);
-        map.put("users",  memberRepository.findAll());
-        logger.info("users: " + map);
-        return map;
-    }
-
-    @PostMapping(path="/auth/out")
+    @PostMapping(path="/logout")
     public Map<String, Object> logout(@RequestBody Map<String, String> m) {
         Map<String, Object> map = new HashMap<>();
         String accessToken = m.get("accessToken");
@@ -332,12 +298,12 @@ public class MainController {
             username = jwtGenerator.getUsernameFromToken(accessToken);
         } catch (ExpiredJwtException e) {
             username = e.getClaims().getSubject();
-            logger.info("in logout: username: " + username);
+            log.info("in logout: username: " + username);
         }
 
         stringRedisTemplate.delete("refresh-" + username);
         //cache logout token for 10 minutes!
-        logger.info(" logout ing : " + accessToken);
+        log.info(" logout ing : " + accessToken);
         stringRedisTemplate.opsForValue().set(accessToken, "true");
         stringRedisTemplate.expire(accessToken, 10*6*1000, TimeUnit.MILLISECONDS);
         map.put("errorCode", 10);
@@ -354,7 +320,7 @@ public class MainController {
             username = jwtGenerator.getUsernameFromToken(accessToken);
         } catch (ExpiredJwtException e) {
             username = e.getClaims().getSubject();
-            logger.info("in logout: username: " + username);
+            log.info("in logout: username: " + username);
         }
 
         map.put("errorCode", 10);
