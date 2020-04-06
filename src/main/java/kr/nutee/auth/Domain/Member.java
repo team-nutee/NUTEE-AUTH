@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Document("users")
 @Getter @Setter
-public class User {
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private String id;

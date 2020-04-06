@@ -1,11 +1,11 @@
 package kr.nutee.auth.Controller;
 
-import kr.nutee.auth.Domain.User;
-import kr.nutee.auth.Repository.UserRepository;
+import kr.nutee.auth.Domain.Member;
+import kr.nutee.auth.Repository.MemberRepository;
 import kr.nutee.auth.jwt.JwtGenerator;
 import kr.nutee.auth.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
-import kr.nutee.auth.service.UserService;
+import kr.nutee.auth.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
-    private final UserRepository userRepository;
-    private final UserService userService;
+    private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final RedisTemplate<String, Object> memberRedisTemplate;
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtUserDetailsService userDetailsService;
@@ -45,8 +45,8 @@ public class AuthController {
     }
 
     @PostMapping(path="/signup")
-    public User signUp(@RequestBody User user) {
-        return userService.insertUser(user);
+    public Member signUp(@RequestBody Member member) {
+        return memberService.insertUser(member);
     }
 
 
