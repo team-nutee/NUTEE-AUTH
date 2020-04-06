@@ -1,53 +1,39 @@
 package kr.nutee.auth.Domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-import lombok.experimental.Delegate;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.Length;
-import org.springframework.data.redis.core.RedisHash;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.util.Date;
 
-@Data
-@Entity
-public class Member implements Serializable {
-
-    private static final long serialVersionUID = -7353484588260422449L;
-
-
+@Document("users")
+@Getter @Setter
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private String id;
+
+    @Column(nullable=false, unique=true, length=50)
+    private String userId;
 
     @Column(nullable=false, unique=true, length=20)
     private String nickname;
 
     @Column(nullable=false, unique=true, length=50)
-    private String userId;
-
-    @Column(nullable=false, unique=true, length=50)
     private String schoolEmail;
 
-    @Length(min=8, max=200)
     private String password;
 
-    @CreationTimestamp
     private Date createdAt;
 
-    @UpdateTimestamp
     private Date updatedAt;
 
-    private Date accessAt;
+    private Date accessedAt;
 
-    private int grade;
+    private int role;
 
-    /*
-    @Column(columnDefinition = "integer default 0")
-    private int email_status;
-    */
 }
-

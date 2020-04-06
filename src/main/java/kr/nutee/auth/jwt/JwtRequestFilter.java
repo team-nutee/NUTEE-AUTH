@@ -2,6 +2,7 @@ package kr.nutee.auth.jwt;
 
 import kr.nutee.auth.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -28,18 +29,11 @@ import java.util.Map;
 
 
 @Component
+@RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtGenerator jwtGenerator;
-
-    @Autowired
-    JwtGenerator jtu;
-
-    @Autowired
-    RedisTemplate<String, Object> redisTemplate;
-
-    @Autowired
-    private JwtUserDetailsService jwtUserDetailsService;
+    private final JwtGenerator jwtGenerator;
+    private final JwtGenerator jtu;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public Authentication getAuthentication(String token) {
         Map<String, Object> parseInfo = jtu.getUserParseInfo(token);

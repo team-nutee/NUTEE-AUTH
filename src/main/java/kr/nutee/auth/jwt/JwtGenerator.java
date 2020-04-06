@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import kr.nutee.auth.service.JwtUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,8 +21,13 @@ public class JwtGenerator implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
     public static final long JWT_ACCESS_TOKEN_VALIDITY = 15 * 60; //10
     public static final long JWT_REFRESH_TOKEN_VALIDITY = 24 * 60 * 60 * 7; //일주일
+
+    @Autowired
+    private JwtUserDetailsService jwtUserDetailsService;
+
     @Value("${jwt.secret}")
     private String secret;
+
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);

@@ -1,10 +1,8 @@
 package kr.nutee.auth.Repository;
 
 import kr.nutee.auth.Domain.Member;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MemberRepository extends CrudRepository<Member, Integer> {
-    Member findByNickname(String username);
-    Member findBySchoolEmail(String email);
-    Long deleteByNickname(String username);
+public interface MemberRepository extends JpaRepository<Member, String> {
+    Member findByUserId(String userId);
 }
