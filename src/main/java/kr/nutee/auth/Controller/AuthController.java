@@ -1,6 +1,7 @@
 package kr.nutee.auth.Controller;
 
-import kr.nutee.auth.Domain.Member;
+import kr.nutee.auth.Domain.SignupDTO;
+import kr.nutee.auth.Entity.Member;
 import kr.nutee.auth.Repository.MemberRepository;
 import kr.nutee.auth.jwt.JwtGenerator;
 import kr.nutee.auth.service.JwtUserDetailsService;
@@ -11,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,10 +27,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-
 @RestController
-@RequestMapping(path = "/auth")
+@RequestMapping(path = "/auth",consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 @RequiredArgsConstructor
+@ResponseBody
 @Slf4j
 public class AuthController {
     private final MemberRepository memberRepository;
@@ -38,16 +42,58 @@ public class AuthController {
     private final AuthenticationManager am;
     private final PasswordEncoder bcryptEncoder;
 
-    @PostMapping(path="/testing")
+    @GetMapping(path="/test")
     public String test() {
         log.info("test");
         return "TEST";
     }
 
-    @PostMapping(path="/signup")
-    public Member signUp(@RequestBody Member member) {
-        return memberService.insertUser(member);
+    @GetMapping(path="/user")
+    public ResponseEntity<Object> user(@ModelAttribute Member member) {
+        return new ResponseEntity<>(memberService.getUser(member.getUserId()), HttpStatus.OK);
     }
+
+    @PostMapping(path="/signup")
+    public ResponseEntity<Object> signUp(@ModelAttribute SignupDTO signupDTO) {
+        if(!memberService.userIdCheck(signupDTO.getUserId())){
+            return new ResponseEntity<>("아이디가 중복되었습니다.", HttpStatus.valueOf(409));
+        }
+        if(!memberService.nicknameCheck(signupDTO.getNickname())){
+            return new ResponseEntity<>("닉네임이 중복되었습니다.", HttpStatus.valueOf(409));
+        }
+        if(!memberService.emailCheck(signupDTO.getSchoolEmail())){
+            return new ResponseEntity<>("이메일이 중복되었습니다.", HttpStatus.valueOf(409));
+        }
+        if(!memberService.otpCheck(signupDTO.getOtp())){
+            return new ResponseEntity<>("이메일 인증에 실패하였습니다.", HttpStatus.valueOf(401));
+        }
+        String password = bcryptEncoder.encode(signupDTO.getPassword());
+        Member member = Member.builder()
+                .userId(signupDTO.getUserId())
+                .nickname(signupDTO.getNickname())
+                .schoolEmail(signupDTO.getSchoolEmail())
+                .password(password)
+                .build();
+
+        return new ResponseEntity<>(memberService.insertUser(member), HttpStatus.OK);
+    }
+
+    @PostMapping(path="/idcheck")
+    public Boolean idCheck(@ModelAttribute Member member) {
+        return memberService.userIdCheck(member.getUserId());
+    }
+
+    @PostMapping(path="/nicknamecheck")
+    public Boolean nicknameCheck(@ModelAttribute Member member) {
+        return memberService.nicknameCheck(member.getNickname());
+    }
+
+    @PostMapping(path="/emailcheck")
+    public Boolean emailCheck(@ModelAttribute Member member) {
+        return memberService.emailCheck(member.getSchoolEmail());
+    }
+
+
 
 
     public String getSHA512Token(String passwordToHash, String salt){
@@ -199,11 +245,11 @@ public class AuthController {
 //    }
 
 //    @PostMapping(path = "/login")
-//    public HashMap<String, Object> login(@RequestBody HashMap<String, Object> map) throws Exception {
-//        final String userId = map.get("nickname");
-//        logger.info("test input username: " + userId);
+//    public HashMap<String, Object> login(@RequestBody Member member) throws Exception {
+//        final String userId = member.getUserId();
+//        log.info("test input username: " + userId);
 //
-//        Member member = memberRepository.findByNickname(userId);
+//        member = memberRepository.findByUserId(userId);
 //
 //        if (stringRedisTemplate.opsForValue().get("email-"+userId) != null) {
 //            map.put("errorCode", 69);
