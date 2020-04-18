@@ -1,7 +1,7 @@
 package kr.nutee.auth.config;
 
 
-import kr.nutee.auth.Domain.Member;
+import kr.nutee.auth.Entity.Member;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

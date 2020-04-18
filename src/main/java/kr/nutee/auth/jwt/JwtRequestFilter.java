@@ -64,7 +64,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String requestTokenHeader = request.getHeader("Authorization");
 
         logger.info("tokenHeader: " + requestTokenHeader);
-        String username = null;
+        String userId = null;
         String jwtToken = null;
 
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
@@ -72,7 +72,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             logger.info("token in requestfilter: " + jwtToken);
 
             try {
-                username = jwtGenerator.getUsernameFromToken(jwtToken);
+                userId = jwtGenerator.getUserIdFromToken(jwtToken);
             } catch (IllegalArgumentException e) {
                 logger.warn("Unable to get JWT Token");
             }
@@ -82,8 +82,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             logger.warn("JWT Token does not begin with Bearer String");
         }
 
-        if (username == null) {
-            logger.info("token maybe expired: username is null.");
+        if (userId == null) {
+            logger.info("token maybe expired: userId is null.");
         } else if (redisTemplate.opsForValue().get(jwtToken) != null) {
             logger.warn("this token already logout!");
         } else {
@@ -91,7 +91,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             Authentication authen =  getAuthentication(jwtToken);
             //만든 authentication 객체로 매번 인증받기
             SecurityContextHolder.getContext().setAuthentication(authen);
-            response.setHeader("username", username);
+            response.setHeader("userId", userId);
         }
         chain.doFilter(request, response);
     }

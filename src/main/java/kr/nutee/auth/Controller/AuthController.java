@@ -1,279 +1,193 @@
 package kr.nutee.auth.Controller;
 
-import kr.nutee.auth.Domain.Member;
+import kr.nutee.auth.Domain.SignupDTO;
+import kr.nutee.auth.Domain.Token;
+import kr.nutee.auth.Entity.Member;
 import kr.nutee.auth.Repository.MemberRepository;
 import kr.nutee.auth.jwt.JwtGenerator;
+import kr.nutee.auth.service.AuthService;
 import kr.nutee.auth.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import kr.nutee.auth.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 
 @RestController
-@RequestMapping(path = "/auth")
+@RequestMapping(path = "/auth",consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 @RequiredArgsConstructor
+@ResponseBody
 @Slf4j
 public class AuthController {
-    private final MemberRepository memberRepository;
+
     private final MemberService memberService;
-    private final RedisTemplate<String, Object> memberRedisTemplate;
+    private final AuthService authService;
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtUserDetailsService userDetailsService;
     private final JwtGenerator jwtGenerator;
-    private final AuthenticationManager am;
+    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder bcryptEncoder;
 
-    @PostMapping(path="/testing")
-    public String test() {
-        log.info("test");
-        return "TEST";
-    }
-
+    /*
+        내용 : 회원가입
+    */
     @PostMapping(path="/signup")
-    public Member signUp(@RequestBody Member member) {
-        return memberService.insertUser(member);
-    }
-
-
-    public String getSHA512Token(String passwordToHash, String salt){
-        String generatedPassword = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-512");
-            md.update(salt.getBytes(StandardCharsets.UTF_8));
-            byte[] bytes = md.digest(passwordToHash.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for(int i=0; i< bytes.length ;i++){
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-            }
-            generatedPassword = sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+    public ResponseEntity<Object> signUp(@ModelAttribute SignupDTO signupDTO) {
+        if(!memberService.userIdCheck(signupDTO.getUserId())){
+            return new ResponseEntity<>("아이디가 중복되었습니다.", HttpStatus.valueOf(409));
         }
-        return generatedPassword;
+        if(!memberService.nicknameCheck(signupDTO.getNickname())){
+            return new ResponseEntity<>("닉네임이 중복되었습니다.", HttpStatus.valueOf(409));
+        }
+        if(!memberService.emailCheck(signupDTO.getSchoolEmail())){
+            return new ResponseEntity<>("이메일이 중복되었습니다.", HttpStatus.valueOf(409));
+        }
+        if(!authService.checkOtp(signupDTO.getOtp())){
+            return new ResponseEntity<>("교내 이메일 인증에 실패하였습니다.", HttpStatus.valueOf(401));
+        }
+        String password = bcryptEncoder.encode(signupDTO.getPassword());
+        Member member = Member.builder()
+                .userId(signupDTO.getUserId())
+                .nickname(signupDTO.getNickname())
+                .schoolEmail(signupDTO.getSchoolEmail())
+                .password(password)
+                .build();
+
+        return new ResponseEntity<>(memberService.insertUser(member), HttpStatus.OK);
     }
 
-    @Value("${my.ip}")
-    private String myIp;
-
-//    @Autowired
-//    public JavaMailSenderImpl javaMailSender;
-//
-//    @Async
-//    public void sendMail(String email, String username, int type) throws Exception {
-//        MimeMessage message = javaMailSender.createMimeMessage();
-//        message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-//        message.setSubject("[본인인증] quadcore 이메일 인증");
-//        int rand = new Random().nextInt(999999);
-//        String formatted = String.format("%06d",rand);
-//        String hash = getSHA512Token(username, formatted);
-//        String redisKey = null;
-//        String htmlStr = null;
-//        if (type == 0) {
-//            redisKey = "email-" + username;
-//            stringRedisTemplate.opsForValue().set(redisKey, hash);
-//            htmlStr = "안녕하세요 " + username + "님. 인증하기를 눌러주세요"
-//                    + "<a href='http://"+myIp+":8080" + "/auth/verify?username="+ username +"&key="+hash+"'>인증하기</a></p>";
-//        } else if (type == 1) {
-//            redisKey = "changepw-" + username;
-//            stringRedisTemplate.opsForValue().set(redisKey, hash);
-//            htmlStr ="안녕하세요 " + username + "님. 비밀번호 변경하를 눌러주세요"
-//                    + "<a href='http://"+myIp+":8080" + "/auth/vfpwemail?username="+ username +"&key="+hash+"'>비밀번호 변경하기</a></p>";
-//        }
-//        stringRedisTemplate.expire(redisKey, 10*24*1000, TimeUnit.MILLISECONDS); // for one day
-//
-//        message.setText(htmlStr, "UTF-8", "html");
-//        javaMailSender.send(message);
-//    }
-
-//    @GetMapping(path="/auth/verify")
-//    public Map<String, Integer> verifyEmail(@RequestParam("username") String username, @RequestParam("key") String hash) {
-//        Map<String, Integer> m = new HashMap<>();
-//
-//        logger.info("redis get : " + stringRedisTemplate.opsForValue().get("email-"+username));
-//        logger.info("hash : " + hash);
-//        if (stringRedisTemplate.opsForValue().get("email-"+username).equals(hash)) {
-//            ValueOperations<String, Object> memvop = memberRedisTemplate.opsForValue();
-//            Member member = (Member) memvop.get("toverify-"+username);
-//            memberRepository.save(member);
-//            stringRedisTemplate.delete("email-"+username);
-//            memberRedisTemplate.delete("toverify-"+username);
-//
-//            ArrayList<String> x = new ArrayList<>();
-//            Follow f = new Follow();
-//            f.setUsername(username);
-//            f.setTweetMembers(x);
-//            f.setId(String.valueOf(f.hashCode()));
-//            followRepository.save(f);
-//
-//
-//            m.put("errorCode", 10);
-//
-//        } else m.put("errorCode", 70);
-//        return m;
-//    }
-
-    //verify email to set new password
-    @GetMapping(path="/vfpwemail")
-    public Map<String, Integer> changePassword(@RequestParam("username") String username, @RequestParam("key") String hash) {
-        Map<String, Integer> m = new HashMap<>();
-        log.info("redis get : " + stringRedisTemplate.opsForValue().get("changepw-"+username));
-        log.info("hash : " + hash);
-        if (stringRedisTemplate.opsForValue().get("changepw-"+username).equals(hash)) {
-            stringRedisTemplate.delete("changepw-"+username);
-            m.put("errorCode", 10);
-            //redirect to password setting page
-        } else m.put("errorCode", 73);
-        return m;
+    /*
+        내용 : 작성한 이메일로 NUTEE 인증 번호를 보낸다.
+    */
+    @PostMapping(path = "/sendotp")
+    public ResponseEntity<Object> sendOtp(@ModelAttribute Member member){
+        String otpNumber = authService.generateOtpNumber();
+        authService.sendOtp(member.getSchoolEmail(),otpNumber);
+        authService.setOtp(otpNumber);
+        return new ResponseEntity<>("otp를 메일로 전송하였습니다.",HttpStatus.OK);
     }
 
-    //send email to authorize user
-//    @PostMapping(path="/auth/getpwmail")
-////    public Map<String, Integer> findPassword(@RequestBody Map<String, String> m) {
-////        Map<String, Integer> map = new HashMap<>();
-////        String nickname = m.get("nickname");
-////        String email = memberRepository.findByNickname(nickname).getSchoolEmail();
-////        try {
-////            sendMail(email, nickname, 1);
-////        } catch(MessagingException e) {
-////            logger.warn("email err: "+e);
-////            map.put("errorCode", 68);
-////            return map;
-////        } catch (Exception e) {
-////            logger.warn("email err: "+e);
-////            map.put("errorCode", 66);
-////            return map;
-////        }
-////
-////        return map;
-////    }
+    /*
+        내용 : 회원가입에 필요한 아이디 중복 체크
+    */
+    @PostMapping(path="/idcheck")
+    public ResponseEntity<Object> idCheck(@ModelAttribute Member member) {
+        if(memberService.userIdCheck(member.getUserId())){
+            return new ResponseEntity<>("아이디 중복 체크 성공.",HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>("중복 되는 아이디 입니다.",HttpStatus.CONFLICT);
+        }
+    }
 
+    /*
+        내용 : 회원가입에 필요한 닉네임 중복 체크
+    */
+    @PostMapping(path="/nicknamecheck")
+    public ResponseEntity<Object> nicknameCheck(@ModelAttribute Member member) {
+        if(memberService.nicknameCheck(member.getNickname())){
+            return new ResponseEntity<>("닉네임 중복 체크 성공.",HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>("중복 되는 닉네임 입니다.",HttpStatus.CONFLICT);
+        }
+    }
 
-//    @PostMapping(path="/auth/register")
-//    public Map<String, Object> addNewUser (@RequestBody Member member) {
-//        String nickname = member.getNickname();
-//
-//
-//
-//        Map<String, Object> map = new HashMap<>();
-//        System.out.println("회원가입요청 아이디: "+nickname + "비번: " + member.getPassword());
-//        member.setNickname(nickname);
-//        member.setId((long) 325);
-//        member.setSchoolEmail(member.getSchoolEmail());
-//        //member.setEmail_status(0);
-//        if (nickname.equals("admin")) {
-//            member.setGrade(0);
-//        } else {
-//            member.setGrade(1);
-//        }
-//        try {
-//            sendMail(member.getSchoolEmail(), nickname, 0);
-//        } catch(MessagingException e) {
-//            map.put("errorCode", 68);
-//            return map;
-//        } catch (Exception e) {
-//            map.put("errorCode", 66);
-//            return map;
-//        }
-//
-//        member.setPassword(bcryptEncoder.encode(member.getPassword()));
-//        map.put("errorCode", 10);
-//        ValueOperations<String, Object> vop = memberRedisTemplate.opsForValue();
-//        vop.set("toverify-"+nickname, member);
-//
-//        return map;
-//    }
+    /*
+        내용 : 회원가입에 필요한 이메일 중복 체크
+    */
+    @PostMapping(path="/emailcheck")
+    public ResponseEntity<Object> emailCheck(@ModelAttribute Member member) {
+        if(memberService.emailCheck(member.getSchoolEmail())){
+            return new ResponseEntity<>("이메일 중복 체크 성공.",HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>("중복 되는 이메일 입니다.",HttpStatus.CONFLICT);
+        }
+    }
 
-//    @PostMapping(path = "/login")
-//    public HashMap<String, Object> login(@RequestBody HashMap<String, Object> map) throws Exception {
-//        final String userId = map.get("nickname");
-//        logger.info("test input username: " + userId);
-//
-//        Member member = memberRepository.findByNickname(userId);
-//
-//        if (stringRedisTemplate.opsForValue().get("email-"+userId) != null) {
-//            map.put("errorCode", 69);
-//            return map;
-//        }
-//
-//        member.setAccessAt(new Date());
-//        memberRepository.save(member);
-//        am.authenticate(new UsernamePasswordAuthenticationToken(userId, map.get("password")));
-//
-//        final UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-//        final String accessToken = jwtGenerator.generateAccessToken(userDetails);
-//        final String refreshToken = jwtGenerator.generateRefreshToken(userId);
-//
-//        //generate Token and save in redis
-//        stringRedisTemplate.opsForValue().set("refresh-" + userId, refreshToken);
-//
-//        logger.info("generated access token: " + accessToken);
-//        logger.info("generated refresh token: " + refreshToken);
-//        map.put("errorCode", 10);
-//        map.put("accessToken", accessToken);
-//        map.put("refreshToken", refreshToken);
-//        return map;
-//    }
+    /*
+        내용 : 회원가입에 필요한 인증 넘버 체크
+    */
+    @PostMapping(path = "/otpcheck")
+    public ResponseEntity<Object> checkOtp(@ModelAttribute SignupDTO signupDTO){
+        String otpNumber = signupDTO.getOtp();
+        Boolean isChecked = authService.checkOtp(otpNumber);
+        if (isChecked){
+            return new ResponseEntity<>("otp 인증에 성공하였습니다.",HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>("otp 인증에 실패하였습니다.",HttpStatus.UNAUTHORIZED);
+        }
+    }
 
+    /*
+        내용 : 사용자가 폼으로 입력한 내용을 통해 로그인 인증을 하고 성공시 refreshToken과 AccessToken 발행
+    */
+    @PostMapping(path = "/login")
+    public Map<String, Object> login(@ModelAttribute Member member) throws Exception {
+        final String userId = member.getUserId();
+        log.info("logined user : " + userId);
 
-//    @PostMapping(path="/checkemail")
-//    public Map<String, Object>  checkEmail (@RequestBody Map<String, String> m) {
-//        Map<String, Object> map = new HashMap<>();
-//        System.out.println("이메일체크 요청 이메일: " + m.get("email"));
-//        if (userRepository.findBySchoolEmail(m.get("email")) == null) {
-//            map.put("errorCode", 10);
-//        }
-//        else map.put("errorCode", 53);
-//        return map;
-//    }
+        //로그인
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userId, member.getPassword()));
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+        final String accessToken = jwtGenerator.generateAccessToken(userDetails);
+        final String refreshToken = jwtGenerator.generateRefreshToken(userId);
+        log.info("generated access token: " + accessToken);
+        log.info("generated refresh token: " + refreshToken);
 
+        //refreshToken -> redis
+        stringRedisTemplate.opsForValue().set("refresh-" + userId, refreshToken);
 
+        //map에 데이터 담아서 client에 전송
+        Map<String,Object> map = new HashMap<>();
+        map.put("errorCode", 10);
+        map.put("accessToken", accessToken);
+        map.put("refreshToken", refreshToken);
+        return map;
+    }
+
+    /*
+        내용 : 사용자의 accessToken이 만료되었을 시 Redis에 저장된 유저의 refreshToken 인증을 통해
+              accessToken 재발급
+    */
     @PostMapping(path="/refresh")
-    public Map<String, Object>  requestForNewAccessToken(@RequestBody Map<String, String> m) {
-        String username = null;
+    public Map<String, Object>  requestForNewAccessToken(@ModelAttribute Token m) {
         Map<String, Object> map = new HashMap<>();
-        String expiredAccessToken = m.get("accessToken");
-        String refreshToken = m.get("refreshToken");
-        log.info("get expired access token: " + expiredAccessToken);
+        String username;
+
+        String expiredAccessToken = m.getAccessToken();
+        String refreshToken = m.getRefreshToken();
 
         try {
-            username = jwtGenerator.getUsernameFromToken(expiredAccessToken);
+            username = jwtGenerator.getUserIdFromToken(expiredAccessToken);
         } catch (ExpiredJwtException e) {
             username = e.getClaims().getSubject();
             log.info("username from expired access token: " + username);
         }
         if (username == null) throw new IllegalArgumentException();
 
+        String refreshTokenFromRedis = stringRedisTemplate.opsForValue().get("refresh-"+username);
+        log.info("refreshTokenFromRedis: " + refreshTokenFromRedis);
 
-        String refreshTokenFromDb = stringRedisTemplate.opsForValue().get("refresh-"+username);
-        log.info("rtfrom db: " + refreshTokenFromDb);
-
-        //user refresh token doesnt match with cache
-        if (!refreshToken.equals(refreshTokenFromDb)) {
+        //유저가 가진 refreshToken과 Redis에 저장된 refreshToken이 일치하는지 확인
+        if (!refreshToken.equals(refreshTokenFromRedis)) {
             map.put("errorCode", 58);
             return map;
         }
 
-        //refresh token is expired
+        //유저가 가진 refreshToekn이 6개월 기간만료된 토큰인지 확인
         if (jwtGenerator.isTokenExpired(refreshToken)) {
             map.put("errorCode", 57);
         }
 
-        //generate access token if valid refresh token
+        //모든 조건 충족 되었을 시 새로운 토큰 발행
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         String newAccessToken =  jwtGenerator.generateAccessToken(userDetails);
         map.put("errorCode", 10);
@@ -281,49 +195,25 @@ public class AuthController {
         return map;
     }
 
-    @GetMapping(path="/normal")
-    public Map<String, Object> onlyNormal() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("errorCode", 10);
-        return map;
-    }
-
+    /*
+        내용 : Redis에 저장된 사용자의 refreshToken 강제 기간만료하여 삭제
+    */
     @PostMapping(path="/logout")
-    public Map<String, Object> logout(@RequestBody Map<String, String> m) {
+    public Map<String, Object> logout(@ModelAttribute Token token) {
         Map<String, Object> map = new HashMap<>();
-        String accessToken = m.get("accessToken");
-        String username = null;
+        String accessToken = token.getAccessToken();
+        String userId;
+
         try {
-            username = jwtGenerator.getUsernameFromToken(accessToken);
+            userId = jwtGenerator.getUserIdFromToken(accessToken);
         } catch (ExpiredJwtException e) {
-            username = e.getClaims().getSubject();
-            log.info("in logout: username: " + username);
+            userId = e.getClaims().getSubject();
+            log.info("in logout: userId: " + userId);
         }
 
-        stringRedisTemplate.delete("refresh-" + username);
-        //cache logout token for 10 minutes!
-        log.info(" logout ing : " + accessToken);
-        stringRedisTemplate.opsForValue().set(accessToken, "true");
-        stringRedisTemplate.expire(accessToken, 10*6*1000, TimeUnit.MILLISECONDS);
-        map.put("errorCode", 10);
-        return map;
-    }
-
-
-    @PostMapping(path="/auth/name")
-    public Map<String, Object> checker(@RequestBody Map<String, String> m) {
-        Map<String, Object> map = new HashMap<>();
-        String username = null;
-        String accessToken = m.get("accessToken");
-        try {
-            username = jwtGenerator.getUsernameFromToken(accessToken);
-        } catch (ExpiredJwtException e) {
-            username = e.getClaims().getSubject();
-            log.info("in logout: username: " + username);
-        }
+        stringRedisTemplate.delete("refresh-" + userId);
 
         map.put("errorCode", 10);
-        map.put("username", username);
         return map;
     }
 }
