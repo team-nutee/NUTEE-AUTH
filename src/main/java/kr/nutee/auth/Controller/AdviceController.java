@@ -1,9 +1,6 @@
 package kr.nutee.auth.Controller;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationRunner;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,26 +8,22 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class AdviceController {
-    private Logger logger = LoggerFactory.getLogger(ApplicationRunner.class);
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public Map<String, Object> duplicateEx(Exception e) {
-        logger.warn("DataIntegrityViolationException" + e.getClass());
-        Map<String, Object> map = new HashMap<>();
-        map.put("errorCode", 53);
-        return map;
+    public ResponseEntity<Object> duplicateEx(Exception e) {
+        log.warn("DataIntegrityViolationException" + e.getClass());
+        return new ResponseEntity<>("Unique 키가 데이터베이스 내부 에서 중복", HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public Map<String, Object> badCredentialEx(Exception e) {
-        logger.warn("BadCredentialsException");
+        log.warn("BadCredentialsException" + e.getClass());
         Map<String, Object> map = new HashMap<>();
         map.put("errorCode", 63);
         return map;
@@ -39,7 +32,7 @@ public class AdviceController {
     @ExceptionHandler({
             IllegalArgumentException.class, MissingServletRequestParameterException.class})
     public Map<String, Object> paramsEx(Exception e) {
-        logger.warn("params ex: "+ e);
+        log.warn("params ex: "+ e.getClass());
         Map<String, Object> map = new HashMap<>();
         map.put("errorCode", 51);
         return map;
@@ -47,7 +40,7 @@ public class AdviceController {
 
     @ExceptionHandler(NullPointerException.class)
     public Map<String, Object> nullEx(Exception e) {
-        logger.warn("null ex" + e.getClass());
+        log.warn("null ex" + e.getClass());
         Map<String, Object> map = new HashMap<>();
         map.put("errorCode", 61);
         return map;

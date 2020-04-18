@@ -37,8 +37,4 @@ public class MemberService {
         return memberRepository.findBySchoolEmail(email) == null;
     }
 
-    public Boolean otpCheck(String email){
-        return memberRepository.findBySchoolEmail(email) == null;
-    }
-
 }
