@@ -70,7 +70,14 @@ public class AuthController {
     */
     @PostMapping(path = "/sendotp")
     public ResponseEntity<Object> sendOtp(@ModelAttribute Member member){
-        String otpNumber = authService.generateOtpNumber();
+        String otpNumber;
+        //관리자 이메일
+        if(member.getSchoolEmail().equals("nutee.skhu.2020@gmail.com")){
+            otpNumber = "000000";
+        }else{
+            //관리자 제외 유저 이메일
+            otpNumber = authService.generateOtpNumber();
+        }
         authService.sendOtp(member.getSchoolEmail(),otpNumber);
         authService.setOtp(otpNumber);
         return new ResponseEntity<>("otp를 메일로 전송하였습니다.",HttpStatus.OK);

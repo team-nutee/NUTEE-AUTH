@@ -18,7 +18,9 @@ public class RedisConfig {
         return new LettuceConnectionFactory();
     }
 
-
+    /*
+        레디스에서 사용할 수 있는 형태로 자바 객체를 만들어서 직렬화하는 메소드.
+    */
     @Bean
     public RedisTemplate<String, Object> memberRedisTemplate() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
