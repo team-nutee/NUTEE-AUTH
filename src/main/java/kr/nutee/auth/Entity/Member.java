@@ -13,7 +13,7 @@ import java.util.Date;
 @Builder @NoArgsConstructor @AllArgsConstructor
 public class Member {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable=false, unique=true, length=20)
@@ -22,7 +22,7 @@ public class Member {
     @Column(nullable=false, unique=true, length=20)
     private String nickname;
 
-    @Column(nullable=false, unique=true, length=50)
+    @Column(nullable=false, length=50)
     private String schoolEmail;
 
     private String password;
@@ -35,6 +35,8 @@ public class Member {
 
     private Date accessedAt;
 
-    private int role;
+    @Enumerated(EnumType.STRING)
+    @Column(length=20)
+    private RoleType role;
 
 }

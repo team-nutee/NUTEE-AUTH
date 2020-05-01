@@ -1,6 +1,7 @@
 package kr.nutee.auth.service;
 
 import kr.nutee.auth.Entity.Member;
+import kr.nutee.auth.Entity.RoleType;
 import kr.nutee.auth.Repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,11 @@ public class MemberService {
 
     public Member insertUser(Member member){
         member.setAccessedAt(new Date());
-        member.setRole(0);
+        if(member.getSchoolEmail().equals("nutee.skhu.2020@gmail.com")){
+            member.setRole(RoleType.MANAGER);
+        }else{
+            member.setRole(RoleType.USER);
+        }
         return memberRepository.save(member);
     }
 
@@ -34,7 +39,11 @@ public class MemberService {
     }
 
     public Boolean emailCheck(String email){
-        return memberRepository.findBySchoolEmail(email) == null;
+        if(email.equals("nutee.skhu.2020@gmail.com")){//관리자계정
+            return true;
+        }else{
+            return memberRepository.findBySchoolEmail(email) == null;
+        }
     }
 
 }
