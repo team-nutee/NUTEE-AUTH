@@ -1,6 +1,7 @@
 package kr.nutee.auth.service;
 
 import kr.nutee.auth.Entity.Member;
+import kr.nutee.auth.Entity.RoleType;
 import kr.nutee.auth.Repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,12 +29,14 @@ public class JwtUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found with userId: " + userId);
         }
 
-        if (member.getRole() == 0) {
+        if (member.getRole() == RoleType.USER) {
             roles.add(new SimpleGrantedAuthority("ROLE_USER"));
-        } else if(member.getRole() == 1) {
+        } else if(member.getRole() == RoleType.MANAGER) {
             roles.add(new SimpleGrantedAuthority("ROLE_MANAGER"));
-        } else if(member.getRole() == 2) {
+        } else if(member.getRole() == RoleType.ADMIN) {
             roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else if(member.getRole() == RoleType.GUEST) {
+            roles.add(new SimpleGrantedAuthority("ROLE_GUEST"));
         }
         return new org.springframework.security.core.userdetails.User(member.getUserId(), member.getPassword(), roles);
     }
