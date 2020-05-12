@@ -137,7 +137,7 @@ public class AuthController {
         내용 : 사용자가 폼으로 입력한 내용을 통해 로그인 인증을 하고 성공시 refreshToken과 AccessToken 발행
     */
     @PostMapping(path = "/login")
-    public Map<String, Object> login(@ModelAttribute Member member) throws Exception {
+    public ResponseEntity<Object> login(@ModelAttribute Member member) throws Exception {
         final String userId = member.getUserId();
         log.info("logined user : " + userId);
 
@@ -157,7 +157,7 @@ public class AuthController {
         map.put("errorCode", 10);
         map.put("accessToken", accessToken);
         map.put("refreshToken", refreshToken);
-        return map;
+        return new ResponseEntity<>(map,HttpStatus.OK);
     }
 
     /*
@@ -165,7 +165,7 @@ public class AuthController {
               accessToken 재발급
     */
     @PostMapping(path="/refresh")
-    public Map<String, Object>  requestForNewAccessToken(@ModelAttribute Token m) {
+    public ResponseEntity<Object>  requestForNewAccessToken(@ModelAttribute Token m) {
         Map<String, Object> map = new HashMap<>();
         String username;
 
@@ -186,7 +186,7 @@ public class AuthController {
         //유저가 가진 refreshToken과 Redis에 저장된 refreshToken이 일치하는지 확인
         if (!refreshToken.equals(refreshTokenFromRedis)) {
             map.put("errorCode", 58);
-            return map;
+            return new ResponseEntity<>(map,HttpStatus.OK);
         }
 
         //유저가 가진 refreshToekn이 6개월 기간만료된 토큰인지 확인
@@ -199,14 +199,14 @@ public class AuthController {
         String newAccessToken =  jwtGenerator.generateAccessToken(userDetails);
         map.put("errorCode", 10);
         map.put("accessToken", newAccessToken);
-        return map;
+        return new ResponseEntity<>(map,HttpStatus.OK);
     }
 
     /*
         내용 : Redis에 저장된 사용자의 refreshToken 강제 기간만료하여 삭제
     */
     @PostMapping(path="/logout")
-    public Map<String, Object> logout(@ModelAttribute Token token) {
+    public ResponseEntity<Object> logout(@ModelAttribute Token token) {
         Map<String, Object> map = new HashMap<>();
         String accessToken = token.getAccessToken();
         String userId;
@@ -221,6 +221,29 @@ public class AuthController {
         stringRedisTemplate.delete("refresh-" + userId);
 
         map.put("errorCode", 10);
-        return map;
+        return new ResponseEntity<>(map,HttpStatus.OK);
+    }
+
+    /*
+        내용 : 아이디 찾기
+    */
+    @PostMapping(path = "/findid")
+    public ResponseEntity<Object> findId(@ModelAttribute Member member){
+        Map<String, Object> map = new HashMap<>();
+        map.put("errorCode",10);
+        map.put("response",authService.findId(member).getUserId());
+        return new ResponseEntity<>(map,HttpStatus.OK);
+    }
+
+    /*
+        내용 : 비밀번호 찾기
+    */
+    @PostMapping(path = "/findpw")
+    public ResponseEntity<Object> findPassword(@ModelAttribute Member member){
+        Map<String, Object> map = new HashMap<>();
+        authService.findPassword(member);
+        map.put("errorCode",10);
+        map.put("message","새 비밀번호를 메일로 전송하였습니다.");
+        return new ResponseEntity<>(map,HttpStatus.OK);
     }
 }

@@ -1,7 +1,7 @@
 package kr.nutee.auth.service;
 
 import kr.nutee.auth.Entity.Member;
-import kr.nutee.auth.Entity.RoleType;
+import kr.nutee.auth.Enum.RoleType;
 import kr.nutee.auth.Repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,12 +13,6 @@ public class MemberService {
 
     @Autowired
     MemberRepository memberRepository;
-
-    public Member getUser(String userId){
-        Member member = memberRepository.findByUserId(userId);
-        System.out.println(member);
-        return member;
-    }
 
     public Member insertUser(Member member){
         member.setAccessedAt(new Date());
