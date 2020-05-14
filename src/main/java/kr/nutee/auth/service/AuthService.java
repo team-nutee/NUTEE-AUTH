@@ -60,11 +60,54 @@ public class AuthService {
             }
         });
     }
+
+    public Member findId(Member member){
+        return memberRepository.findBySchoolEmail(member.getSchoolEmail());
+    }
+
+    public void findPassword(Member member){
+        try {
+            MimeMessage message = new MimeMessage(getEmailSession());
+            message.setFrom(new InternetAddress(mailId));
+
+            //수신자메일주소
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(member.getSchoolEmail()));
+
+            //메일 제목 설정
+            message.setSubject("[NUTEE] 새로 설정 된 비밀번호를 확인해 주세요."); //메일 제목을 입력
+
+            //비밀번호 새로 설정
+            member = memberRepository.findByUserId(member.getUserId());
+            String newPw = generateNewPassword();
+            member.setPassword(bcryptEncoder.encode(newPw));
+            memberRepository.save(member);
+
+            //메일 내용 입력
+            message.setText(newPw);
+
+            //메일 전송
+            Transport.send(message);
+
+            log.info("message sent successfully...");
+        } catch (MessagingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     public String generateOtpNumber(){
         long seed = System.currentTimeMillis();
         Random rand = new Random(seed);
         int min = 10000;
         int max = 99999;
+        return Integer.toString(rand.nextInt(max - min + 1)+ min);
+    }
+
+    public String generateNewPassword(){
+        long seed = System.currentTimeMillis();
+        Random rand = new Random(seed);
+        int min = 10000000;
+        int max = 99999999;
         return Integer.toString(rand.nextInt(max - min + 1)+ min);
     }
 
@@ -84,7 +127,7 @@ public class AuthService {
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(schoolEmail));
 
             // Subject
-            message.setSubject("NUTEE 인증번호를 확인해주세요."); //메일 제목을 입력
+            message.setSubject("[NUTEE] 인증번호를 확인해주세요."); //메일 제목을 입력
 
             // Text
             message.setText(otp);    //메일 내용을 입력
@@ -103,5 +146,8 @@ public class AuthService {
         System.out.println(otpRepository.findByOtpNumber(otp));
         return otpRepository.findByOtpNumber(otp) != null;
     }
+
+    //아이디 찾기
+    //비밀번호 찾기
 
 }
