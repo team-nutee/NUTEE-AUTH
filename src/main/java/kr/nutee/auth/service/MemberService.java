@@ -5,8 +5,7 @@ import kr.nutee.auth.Enum.RoleType;
 import kr.nutee.auth.Repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Service
 public class MemberService {
@@ -15,7 +14,7 @@ public class MemberService {
     MemberRepository memberRepository;
 
     public Member insertUser(Member member){
-        member.setAccessedAt(new Date());
+        member.setAccessedAt((LocalDateTime.now()));
         if(member.getSchoolEmail().equals("nutee.skhu.2020@gmail.com")){
             member.setRole(RoleType.MANAGER);
         }else{

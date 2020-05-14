@@ -2,16 +2,15 @@ package kr.nutee.auth.Entity;
 
 import kr.nutee.auth.Enum.RoleType;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 @Builder @NoArgsConstructor @AllArgsConstructor
-public class Member {
+public class Member extends LogDateTime {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
@@ -27,16 +26,14 @@ public class Member {
 
     private String password;
 
-    @CreationTimestamp
-    private Date createdAt;
-
-    @UpdateTimestamp
-    private Date updatedAt;
-
-    private Date accessedAt;
+    private LocalDateTime accessedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(length=20)
     private RoleType role;
+
+    private boolean isDeleted;
+
+    private boolean isBlocked;
 
 }
