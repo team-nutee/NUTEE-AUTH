@@ -23,8 +23,8 @@ import java.util.function.Function;
 public class JwtGenerator implements Serializable {
 
     private static final long serialVersionUID = -2550185165626007488L;
-    public static final long JWT_ACCESS_TOKEN_VALIDITY = 30 * 60; //30분
-    public static final long JWT_REFRESH_TOKEN_VALIDITY = 24 * 60 * 60 * 7; //일주일
+    public static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 60 * 24 * 7; //1주일
+    public static final long JWT_REFRESH_TOKEN_VALIDITY = 24 * 60 * 60 * 180; //6개월
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;

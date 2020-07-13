@@ -1,4 +1,4 @@
-package kr.nutee.auth.Domain;
+package kr.nutee.auth.DTO;
 
 import lombok.Data;
 

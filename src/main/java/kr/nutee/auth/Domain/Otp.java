@@ -1,4 +1,4 @@
-package kr.nutee.auth.Entity;
+package kr.nutee.auth.Domain;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

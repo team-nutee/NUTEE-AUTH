@@ -1,6 +1,6 @@
 package kr.nutee.auth.service;
 
-import kr.nutee.auth.Entity.Member;
+import kr.nutee.auth.Domain.Member;
 import kr.nutee.auth.Enum.RoleType;
 import kr.nutee.auth.Repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,9 @@ public class MemberService {
             member.setRole(RoleType.USER);
         }
         return memberRepository.save(member);
+    }
+    public Member getUser(String userId){
+        return memberRepository.findByUserId(userId);
     }
 
     public Boolean userIdCheck(String userId){

@@ -1,6 +1,6 @@
 package kr.nutee.auth.Repository;
 
-import kr.nutee.auth.Entity.Member;
+import kr.nutee.auth.Domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

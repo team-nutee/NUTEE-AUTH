@@ -1,7 +1,7 @@
 package kr.nutee.auth.service;
 
-import kr.nutee.auth.Entity.Member;
-import kr.nutee.auth.Entity.Otp;
+import kr.nutee.auth.Domain.Member;
+import kr.nutee.auth.Domain.Otp;
 import kr.nutee.auth.Repository.MemberRepository;
 import kr.nutee.auth.Repository.OtpRepository;
 import lombok.extern.slf4j.Slf4j;
