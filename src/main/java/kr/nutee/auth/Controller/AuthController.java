@@ -6,8 +6,10 @@ import kr.nutee.auth.DTO.Token;
 import kr.nutee.auth.Domain.Interest;
 import kr.nutee.auth.Domain.Major;
 import kr.nutee.auth.Domain.Member;
+import kr.nutee.auth.Exception.ConflictException;
 import kr.nutee.auth.Repository.InterestRepository;
 import kr.nutee.auth.Repository.MajorRepository;
+import kr.nutee.auth.Repository.OtpRepository;
 import kr.nutee.auth.jwt.JwtGenerator;
 import kr.nutee.auth.service.AuthService;
 import kr.nutee.auth.service.JwtUserDetailsService;
@@ -54,18 +56,18 @@ public class AuthController {
         내용 : 회원가입
     */
     @PostMapping(path="/signup")
-    public ResponseEntity<Object> signUp(@RequestBody @Valid SignupDTO signupDTO) {
+    public ResponseEntity<Member> signUp(@RequestBody @Valid SignupDTO signupDTO) {
         if(!memberService.userIdCheck(signupDTO.getUserId())){
-            return new ResponseEntity<>("아이디가 중복되었습니다.", HttpStatus.valueOf(409));
+           throw new ConflictException("아이디가 중복되었습니다.",HttpStatus.CONFLICT);
         }
         if(!memberService.nicknameCheck(signupDTO.getNickname())){
-            return new ResponseEntity<>("닉네임이 중복되었습니다.", HttpStatus.valueOf(409));
+            throw new ConflictException("닉네임이 중복되었습니다.",HttpStatus.CONFLICT);
         }
         if(!memberService.emailCheck(signupDTO.getSchoolEmail())){
-            return new ResponseEntity<>("이메일이 중복되었습니다.", HttpStatus.valueOf(409));
+            throw new ConflictException("이메일이 중복되었습니다.",HttpStatus.CONFLICT);
         }
         if(!authService.checkOtp(signupDTO.getOtp())){
-            return new ResponseEntity<>("교내 이메일 인증에 실패하였습니다.", HttpStatus.valueOf(401));
+            throw new ConflictException("교내 이메일 인증에 실패 하였습니다.",HttpStatus.UNAUTHORIZED);
         }
 
         String password = bcryptEncoder.encode(signupDTO.getPassword());
@@ -76,30 +78,35 @@ public class AuthController {
                 .password(password)
                 .build();
 
+        member = memberService.insertUser(member);
+
+        Member finalMember = member;
         signupDTO.getInterests()
                 .forEach(v -> interestRepository.save(
                         Interest.builder()
                                 .interest(v)
-                                .member(member)
+                                .member(finalMember)
                                 .build()
                 ));
 
+        Member finalMember1 = member;
         signupDTO.getMajors()
                 .forEach(v -> majorRepository.save(
                         Major.builder()
                                 .major(v)
-                                .member(member)
+                                .member(finalMember1)
                                 .build()
                 ));
 
-        return new ResponseEntity<>(memberService.insertUser(member), HttpStatus.OK);
+        //Todo :return값에 password가 포함되어있어 삭제해서 보내주거나 아예 return을 하지 않는다.
+        return new ResponseEntity<>(member, HttpStatus.OK);
     }
 
     /*
         내용 : 작성한 이메일로 NUTEE 인증 번호를 보낸다.
     */
     @PostMapping(path = "/sendotp")
-    public ResponseEntity<Object> sendOtp(@RequestBody SendOTP sendOTP){
+    public ResponseEntity<String> sendOtp(@RequestBody SendOTP sendOTP){
         String otpNumber;
         //관리자 이메일
         if(sendOTP.getSchoolEmail().equals("nutee.skhu.2020@gmail.com")){

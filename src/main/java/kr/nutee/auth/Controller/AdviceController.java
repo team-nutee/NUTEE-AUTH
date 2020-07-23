@@ -1,5 +1,8 @@
 package kr.nutee.auth.Controller;
 
+import kr.nutee.auth.DTO.Response;
+import kr.nutee.auth.Exception.BusinessException;
+import kr.nutee.auth.Exception.ConflictException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,17 @@ public class AdviceController {
     public ResponseEntity<Object> duplicateEx(Exception e) {
         log.warn("DataIntegrityViolationException" + e.getClass());
         return new ResponseEntity<>("Unique 키가 데이터베이스 내부 에서 중복", HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Response> conflictException(BusinessException e) {
+        Response res = Response.builder()
+                .code(40)
+                .message(e.getMessage())
+                .body(null)
+                .build();
+        log.warn("ConflictException" + e.getClass());
+        return new ResponseEntity<>(res, e.getStatus());
     }
 
     @ExceptionHandler(BadCredentialsException.class)

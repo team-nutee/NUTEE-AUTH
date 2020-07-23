@@ -3,6 +3,7 @@ package kr.nutee.auth.service;
 import kr.nutee.auth.Domain.Member;
 import kr.nutee.auth.Enum.RoleType;
 import kr.nutee.auth.Repository.MemberRepository;
+import kr.nutee.auth.Repository.OtpRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -13,6 +14,9 @@ public class MemberService {
     @Autowired
     MemberRepository memberRepository;
 
+    @Autowired
+    OtpRepository otpRepository;
+
     public Member insertUser(Member member){
         member.setAccessedAt((LocalDateTime.now()));
         if(member.getSchoolEmail().equals("nutee.skhu.2020@gmail.com")){
@@ -20,6 +24,7 @@ public class MemberService {
         }else{
             member.setRole(RoleType.USER);
         }
+        otpRepository.deleteOtpByOtpNumber("000000");
         return memberRepository.save(member);
     }
     public Member getUser(String userId){
