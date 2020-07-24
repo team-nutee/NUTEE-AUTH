@@ -24,7 +24,6 @@ public class MemberService {
         }else{
             member.setRole(RoleType.USER);
         }
-        otpRepository.deleteOtpByOtpNumber("000000");
         return memberRepository.save(member);
     }
     public Member getUser(String userId){

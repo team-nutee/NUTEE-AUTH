@@ -7,6 +7,6 @@ import java.util.Date;
 
 public interface OtpRepository extends JpaRepository<Otp, Long> {
     void deleteAllByCreatedAtLessThan(Date date);
-    void deleteOtpByOtpNumber(String otp);
+    void deleteOtpByOtpNumber(String otpNumber);
     Otp findByOtpNumber(String otp);
 }
