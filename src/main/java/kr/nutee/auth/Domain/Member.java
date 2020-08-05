@@ -2,7 +2,6 @@ package kr.nutee.auth.Domain;
 
 import kr.nutee.auth.Enum.RoleType;
 import lombok.*;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,10 +29,15 @@ public class Member extends LogDateTime {
 
     private LocalDateTime accessedAt;
 
+    @OneToOne (mappedBy = "member")
+    private Image image;
+
     @OneToMany (mappedBy = "member")
+    @Builder.Default
     private List<Interest> interests = new ArrayList<>();
 
     @OneToMany (mappedBy = "member")
+    @Builder.Default
     private List<Major> majors = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

@@ -1,4 +1,4 @@
-package kr.nutee.auth.DTO;
+package kr.nutee.auth.DTO.Request;
 
 import lombok.*;
 

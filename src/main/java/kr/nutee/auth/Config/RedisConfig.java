@@ -1,4 +1,4 @@
-package kr.nutee.auth.config;
+package kr.nutee.auth.Config;
 
 
 import kr.nutee.auth.Domain.Member;

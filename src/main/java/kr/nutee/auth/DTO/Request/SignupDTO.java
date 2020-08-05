@@ -1,4 +1,4 @@
-package kr.nutee.auth.DTO;
+package kr.nutee.auth.DTO.Request;
 
 import lombok.*;
 
@@ -25,7 +25,8 @@ public class SignupDTO {
     private String otp;
 
     @NotEmpty
-    private List<String> interests;
+    private List<String>
+            interests;
 
     @NotEmpty
     private List<String> majors;

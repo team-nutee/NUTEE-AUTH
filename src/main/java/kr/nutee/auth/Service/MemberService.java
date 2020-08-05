@@ -1,4 +1,4 @@
-package kr.nutee.auth.service;
+package kr.nutee.auth.Service;
 
 import kr.nutee.auth.Domain.Member;
 import kr.nutee.auth.Enum.RoleType;
