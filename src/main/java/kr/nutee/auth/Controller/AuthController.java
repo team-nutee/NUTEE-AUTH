@@ -64,7 +64,7 @@ public class AuthController {
                 .body(body)
                 .build();
 
-        ResponseResource resource = new ResponseResource(response, AuthController.class, body.getId());
+        ResponseResource resource = new ResponseResource(response, AuthController.class, "signup");
         WebMvcLinkBuilder selfLinkBuilder = linkTo(AuthController.class).slash("signup");
         URI createdURI = selfLinkBuilder.toUri();
 

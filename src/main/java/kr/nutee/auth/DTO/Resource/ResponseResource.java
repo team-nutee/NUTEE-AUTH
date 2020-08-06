@@ -18,4 +18,14 @@ public class ResponseResource extends EntityModel<Response> {
         super(response,links);
         add(linkTo(c).withSelfRel());
     }
+
+    public ResponseResource(Response response, Class c, String url, Link... links){
+        super(response,links);
+        add(linkTo(c).slash(url).withSelfRel());
+    }
+
+    public ResponseResource(Response response, Class c, Long id, String url, Link... links){
+        super(response,links);
+        add(linkTo(c).slash(id).slash(url).withSelfRel());
+    }
 }

@@ -156,7 +156,6 @@ class AuthControllerTest extends BaseControllerTest {
                                 fieldWithPath("schoolEmail").description("title of new post(not null)")
                         ),
                         responseHeaders(
-                                headerWithName(HttpHeaders.LOCATION).description("location header"),
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
                         ),
                         responseFields(
