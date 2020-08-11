@@ -1,6 +1,5 @@
 package kr.nutee.auth.Domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -11,19 +10,15 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Interest {
-
+public class Image extends LogDateTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "interest_id")
+    @Column(name = "image_id")
     private Long id;
 
-    @Column(length=20)
-    private String interest;
+    private String src;
 
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-
 }

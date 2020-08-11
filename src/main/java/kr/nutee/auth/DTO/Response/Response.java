@@ -1,4 +1,4 @@
-package kr.nutee.auth.DTO;
+package kr.nutee.auth.DTO.Response;
 
 import lombok.Builder;
 import lombok.Data;

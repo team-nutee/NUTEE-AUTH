@@ -1,4 +1,4 @@
-package kr.nutee.auth.service;
+package kr.nutee.auth.Service;
 
 import kr.nutee.auth.Domain.Member;
 import kr.nutee.auth.Enum.RoleType;
@@ -22,7 +22,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        Member member = repository.findByUserId(userId);
+        Member member = repository.findMemberByUserId(userId);
         List<GrantedAuthority> roles = new ArrayList<>();
         if (member == null) {
             throw new UsernameNotFoundException("User not found with userId: " + userId);

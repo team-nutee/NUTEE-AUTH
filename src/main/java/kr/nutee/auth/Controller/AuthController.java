@@ -1,24 +1,25 @@
 package kr.nutee.auth.Controller;
 
-import kr.nutee.auth.DTO.SendOTP;
-import kr.nutee.auth.DTO.SignupDTO;
+import kr.nutee.auth.DTO.Request.*;
+import kr.nutee.auth.DTO.Resource.ResponseResource;
+import kr.nutee.auth.DTO.Response.LoginResponse;
+import kr.nutee.auth.DTO.Response.RefreshResponse;
+import kr.nutee.auth.DTO.Response.Response;
+import kr.nutee.auth.DTO.Response.UserData;
 import kr.nutee.auth.DTO.Token;
-import kr.nutee.auth.Domain.Interest;
-import kr.nutee.auth.Domain.Major;
 import kr.nutee.auth.Domain.Member;
+import kr.nutee.auth.Enum.ErrorCode;
 import kr.nutee.auth.Exception.ConflictException;
-import kr.nutee.auth.Repository.InterestRepository;
-import kr.nutee.auth.Repository.MajorRepository;
-import kr.nutee.auth.Repository.OtpRepository;
+import kr.nutee.auth.Exception.NotExistException;
 import kr.nutee.auth.jwt.JwtGenerator;
-import kr.nutee.auth.service.AuthService;
-import kr.nutee.auth.service.JwtUserDetailsService;
+import kr.nutee.auth.Service.AuthService;
+import kr.nutee.auth.Service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
-import kr.nutee.auth.service.MemberService;
+import kr.nutee.auth.Service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
 import java.util.*;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
 @RestController
-@RequestMapping(path = "/auth",consumes = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/auth", consumes = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 @ResponseBody
 @Slf4j
@@ -40,174 +44,170 @@ public class AuthController {
 
     private final MemberService memberService;
     private final AuthService authService;
-    private final InterestRepository interestRepository;
-    private final MajorRepository majorRepository;
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtUserDetailsService userDetailsService;
     private final JwtGenerator jwtGenerator;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder bcryptEncoder;
 
-    @GetMapping(path="/test")
-    public ResponseEntity<Object> test(){
-        return new ResponseEntity<>("test", HttpStatus.valueOf(200));
-    }
     /*
         내용 : 회원가입
     */
-    @PostMapping(path="/signup")
-    public ResponseEntity<Member> signUp(@RequestBody @Valid SignupDTO signupDTO) {
-        if(!memberService.userIdCheck(signupDTO.getUserId())){
-           throw new ConflictException("아이디가 중복되었습니다.",HttpStatus.CONFLICT);
-        }
-        if(!memberService.nicknameCheck(signupDTO.getNickname())){
-            throw new ConflictException("닉네임이 중복되었습니다.",HttpStatus.CONFLICT);
-        }
-        if(!memberService.emailCheck(signupDTO.getSchoolEmail())){
-            throw new ConflictException("이메일이 중복되었습니다.",HttpStatus.CONFLICT);
-        }
-        if(!authService.checkOtp(signupDTO.getOtp())){
-            throw new ConflictException("교내 이메일 인증에 실패 하였습니다.",HttpStatus.UNAUTHORIZED);
-        }
-
-        String password = bcryptEncoder.encode(signupDTO.getPassword());
-        Member member = Member.builder()
-                .userId(signupDTO.getUserId())
-                .nickname(signupDTO.getNickname())
-                .schoolEmail(signupDTO.getSchoolEmail())
-                .password(password)
+    @PostMapping(path = "/signup")
+    public ResponseEntity<ResponseResource> signUp(@RequestBody @Valid SignupDTO signupDTO) {
+        UserData body = authService.signUp(signupDTO);
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body(body)
                 .build();
 
-        member = memberService.insertUser(member);
+        ResponseResource resource = new ResponseResource(response, AuthController.class, "signup");
+        WebMvcLinkBuilder selfLinkBuilder = linkTo(AuthController.class).slash("signup");
+        URI createdURI = selfLinkBuilder.toUri();
 
-        Member finalMember = member;
-        signupDTO.getInterests()
-                .forEach(v -> interestRepository.save(
-                        Interest.builder()
-                                .interest(v)
-                                .member(finalMember)
-                                .build()
-                ));
-
-        Member finalMember1 = member;
-        signupDTO.getMajors()
-                .forEach(v -> majorRepository.save(
-                        Major.builder()
-                                .major(v)
-                                .member(finalMember1)
-                                .build()
-                ));
-
-        //Todo :return값에 password가 포함되어있어 삭제해서 보내주거나 아예 return을 하지 않는다.
-        return new ResponseEntity<>(member, HttpStatus.OK);
+        return ResponseEntity.created(createdURI).body(resource);
     }
 
     /*
         내용 : 작성한 이메일로 NUTEE 인증 번호를 보낸다.
     */
     @PostMapping(path = "/sendotp")
-    public ResponseEntity<String> sendOtp(@RequestBody SendOTP sendOTP){
-        String otpNumber;
-        //관리자 이메일
-        if(sendOTP.getSchoolEmail().equals("nutee.skhu.2020@gmail.com")){
-            otpNumber = "000000";
-        }else{
-            //관리자 제외 유저 이메일
-            otpNumber = authService.generateOtpNumber();
-        }
-        authService.sendOtp(sendOTP.getSchoolEmail(),otpNumber);
-        authService.setOtp(otpNumber);
-        return new ResponseEntity<>("otp를 메일로 전송하였습니다.",HttpStatus.OK);
+    public ResponseEntity<ResponseResource> sendOtp(@RequestBody @Valid SendOTP sendOTP) {
+        authService.sendOtp(sendOTP.getSchoolEmail(), setOtpNumber(sendOTP));
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body("해당 이메일로 OTP를 전송하였습니다.")
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : 회원가입에 필요한 아이디 중복 체크
     */
-    @PostMapping(path="/idcheck")
-    public ResponseEntity<Object> idCheck(@ModelAttribute Member member) {
-        if(memberService.userIdCheck(member.getUserId())){
-            return new ResponseEntity<>("아이디 중복 체크 성공.",HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("중복 되는 아이디 입니다.",HttpStatus.CONFLICT);
+    @PostMapping(path = "/checkid")
+    public ResponseEntity<ResponseResource> idCheck(@RequestBody @Valid CheckIdDTO requestBody) {
+        if (!memberService.checkUserId(requestBody.getUserId())) {
+            throw new ConflictException("아이디가 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
         }
+
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body("아이디 중복체크 성공.")
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : 회원가입에 필요한 닉네임 중복 체크
     */
-    @PostMapping(path="/nicknamecheck")
-    public ResponseEntity<Object> nicknameCheck(@ModelAttribute Member member) {
-        if(memberService.nicknameCheck(member.getNickname())){
-            return new ResponseEntity<>("닉네임 중복 체크 성공.",HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("중복 되는 닉네임 입니다.",HttpStatus.CONFLICT);
+    @PostMapping(path = "/checknickname")
+    public ResponseEntity<ResponseResource> nicknameCheck(@RequestBody @Valid CheckNicknameDTO checkNicknameDTO) {
+        if (!memberService.checkNickname(checkNicknameDTO.getNickname())) {
+            throw new ConflictException("닉네임이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
         }
+
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body("닉네임 중복 체크 성공.")
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : 회원가입에 필요한 이메일 중복 체크
     */
-    @PostMapping(path="/emailcheck")
-    public ResponseEntity<Object> emailCheck(@ModelAttribute Member member) {
-        if(memberService.emailCheck(member.getSchoolEmail())){
-            return new ResponseEntity<>("이메일 중복 체크 성공.",HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("중복 되는 이메일 입니다.",HttpStatus.CONFLICT);
+    @PostMapping(path = "/checkemail")
+    public ResponseEntity<ResponseResource> emailCheck(@RequestBody @Valid CheckEmailDTO checkEmailDTO) {
+        if (!memberService.checkEmail(checkEmailDTO.getSchoolEmail())) {
+            throw new ConflictException("이메일이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
         }
+
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body("이메일 중복 체크 성공.")
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : 회원가입에 필요한 인증 넘버 체크
     */
-    @PostMapping(path = "/otpcheck")
-    public ResponseEntity<Object> checkOtp(@ModelAttribute @Valid SignupDTO signupDTO){
-        String otpNumber = signupDTO.getOtp();
-        Boolean isChecked = authService.checkOtp(otpNumber);
-        if (isChecked){
-            return new ResponseEntity<>("otp 인증에 성공하였습니다.",HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("otp 인증에 실패하였습니다.",HttpStatus.UNAUTHORIZED);
+    @PostMapping(path = "/checkotp")
+    public ResponseEntity<ResponseResource> checkOtp(@RequestBody @Valid CheckOtpDTO checkOtpDTO) {
+        if (!authService.checkOtp(checkOtpDTO.getOtp())) {
+            throw new NotExistException("otp 인증에 실패하였습니다.", ErrorCode.NOT_EXIST, HttpStatus.UNAUTHORIZED);
         }
+
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body("OTP 인증 성공.")
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : 사용자가 폼으로 입력한 내용을 통해 로그인 인증을 하고 성공시 refreshToken과 AccessToken 발행
     */
     @PostMapping(path = "/login")
-    public ResponseEntity<Object> login(@RequestBody Member member) throws Exception {
-        final String userId = member.getUserId();
-        log.info("logined user : " + userId);
+    public ResponseEntity<ResponseResource> login(@RequestBody @Valid LoginDTO loginDTO) {
+        final String userId = loginDTO.getUserId();
 
         //로그인
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userId, member.getPassword()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userId, loginDTO.getPassword()));
         final UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
         final String accessToken = jwtGenerator.generateAccessToken(userDetails);
         final String refreshToken = jwtGenerator.generateRefreshToken(userId);
-        log.info("generated access token: " + accessToken);
-        log.info("generated refresh token: " + refreshToken);
 
         //refreshToken -> redis
         stringRedisTemplate.opsForValue().set("refresh-" + userId, refreshToken);
 
-        //map에 데이터 담아서 client에 전송
-        Map<String,Object> map = new HashMap<>();
-        map.put("errorCode", 10);
-        map.put("accessToken", accessToken);
-        map.put("refreshToken", refreshToken);
-        return new ResponseEntity<>(map,HttpStatus.OK);
+        LoginResponse body = LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body(body)
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : 사용자의 accessToken이 만료되었을 시 Redis에 저장된 유저의 refreshToken 인증을 통해
               accessToken 재발급
     */
-    @PostMapping(path="/refresh")
-    public ResponseEntity<Object>  requestForNewAccessToken(@ModelAttribute Token m) {
-        Map<String, Object> map = new HashMap<>();
+    @PostMapping(path = "/refresh")
+    public ResponseEntity<ResponseResource> requestForNewAccessToken(@RequestBody RefreshRequest token) {
         String username;
 
-        String expiredAccessToken = m.getAccessToken();
-        String refreshToken = m.getRefreshToken();
+        String expiredAccessToken = token.getAccessToken();
+        String refreshToken = token.getRefreshToken();
 
         try {
             username = jwtGenerator.getUserIdFromToken(expiredAccessToken);
@@ -217,34 +217,42 @@ public class AuthController {
         }
         if (username == null) throw new IllegalArgumentException();
 
-        String refreshTokenFromRedis = stringRedisTemplate.opsForValue().get("refresh-"+username);
+        String refreshTokenFromRedis = stringRedisTemplate.opsForValue().get("refresh-" + username);
         log.info("refreshTokenFromRedis: " + refreshTokenFromRedis);
 
         //유저가 가진 refreshToken과 Redis에 저장된 refreshToken이 일치하는지 확인
-        if (!refreshToken.equals(refreshTokenFromRedis)) {
-            map.put("errorCode", 58);
-            return new ResponseEntity<>(map,HttpStatus.OK);
-        }
+        // Todo : 캐싱을 어떻게 할 지 방법을 찾지 못해 주석처리 해두었음. 테스트 해야함.
+//        if (!refreshToken.equals(refreshTokenFromRedis)) {
+//            throw new IllegalArgumentException("refreshToken error");
+//        }
 
-        //유저가 가진 refreshToekn이 6개월 기간만료된 토큰인지 확인
+        //유저가 가진 refreshToken이 6개월 기간만료된 토큰인지 확인
         if (jwtGenerator.isTokenExpired(refreshToken)) {
-            map.put("errorCode", 57);
+            throw new IllegalArgumentException("refreshToken expired");
         }
 
         //모든 조건 충족 되었을 시 새로운 토큰 발행
         final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        String newAccessToken =  jwtGenerator.generateAccessToken(userDetails);
-        map.put("errorCode", 10);
-        map.put("accessToken", newAccessToken);
-        return new ResponseEntity<>(map,HttpStatus.OK);
+        RefreshResponse body = RefreshResponse.builder()
+                .accessToken(jwtGenerator.generateAccessToken(userDetails))
+                .build();
+
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body(body)
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : Redis에 저장된 사용자의 refreshToken 강제 기간만료하여 삭제
     */
-    @PostMapping(path="/logout")
-    public ResponseEntity<Object> logout(@ModelAttribute Token token) {
-        Map<String, Object> map = new HashMap<>();
+    @PostMapping(path = "/logout")
+    public ResponseEntity<ResponseResource> logout(@RequestBody LogoutRequest token) {
         String accessToken = token.getAccessToken();
         String userId;
 
@@ -257,30 +265,61 @@ public class AuthController {
 
         stringRedisTemplate.delete("refresh-" + userId);
 
-        map.put("errorCode", 10);
-        return new ResponseEntity<>(map,HttpStatus.OK);
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body("로그아웃에 성공했습니다.")
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : 아이디 찾기
     */
     @PostMapping(path = "/findid")
-    public ResponseEntity<Object> findId(@ModelAttribute Member member){
-        Map<String, Object> map = new HashMap<>();
-        map.put("errorCode",10);
-        map.put("response",authService.findId(member).getUserId());
-        return new ResponseEntity<>(map,HttpStatus.OK);
+    public ResponseEntity<Object> findId(@RequestBody FindIdRequest body) {
+        String userId = authService.findId(body.getSchoolEmail()).getUserId();
+
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body(userId)
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     /*
         내용 : 비밀번호 찾기
     */
     @PostMapping(path = "/findpw")
-    public ResponseEntity<Object> findPassword(@ModelAttribute Member member){
-        Map<String, Object> map = new HashMap<>();
-        authService.findPassword(member);
-        map.put("errorCode",10);
-        map.put("message","새 비밀번호를 메일로 전송하였습니다.");
-        return new ResponseEntity<>(map,HttpStatus.OK);
+    public ResponseEntity<ResponseResource> findPassword(@RequestBody FindPassWordRequest body) {
+        authService.findPassword(body.getSchoolEmail(),body.getUserId());
+
+        Response response = Response.builder()
+                .code(10)
+                .message("SUCCESS")
+                .body("새 비밀번호를 메일로 전송하였습니다.")
+                .build();
+
+        ResponseResource resource = new ResponseResource(response, AuthController.class);
+
+        return ResponseEntity.ok().body(resource);
+    }
+
+    private String setOtpNumber(@RequestBody SendOTP sendOTP) {
+        String otpNumber;//관리자 이메일
+        if (sendOTP.getSchoolEmail().equals("nutee.skhu.2020@gmail.com")) {
+            otpNumber = "000000";
+        } else {
+            //관리자 제외 유저 이메일
+            otpNumber = authService.generateOtpNumber();
+        }
+        return otpNumber;
     }
 }

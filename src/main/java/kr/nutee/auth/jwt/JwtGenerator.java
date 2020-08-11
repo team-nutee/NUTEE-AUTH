@@ -1,11 +1,10 @@
 package kr.nutee.auth.jwt;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import kr.nutee.auth.Repository.MemberRepository;
-import kr.nutee.auth.service.JwtUserDetailsService;
+import kr.nutee.auth.Service.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,7 +22,7 @@ import java.util.function.Function;
 public class JwtGenerator implements Serializable {
 
     private static final long serialVersionUID = -2550185165626007488L;
-    public static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 60 * 24 * 7; //1주일
+    public static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 60 * 24 * 365 * 10; //10년
     public static final long JWT_REFRESH_TOKEN_VALIDITY = 24 * 60 * 60 * 180; //6개월
 
     @Autowired
@@ -47,7 +46,7 @@ public class JwtGenerator implements Serializable {
         for (GrantedAuthority a: userDetails.getAuthorities()) {
             li.add(a.getAuthority());
         }
-        claims.put("id",memberRepository.findByUserId(userDetails.getUsername()).getId());
+        claims.put("id",memberRepository.findMemberByUserId(userDetails.getUsername()).getId());
         claims.put("role",li.get(0));
         return Jwts.builder()
                 .setClaims(claims)

@@ -1,5 +1,6 @@
 package kr.nutee.auth.Domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -20,6 +21,7 @@ public class Major {
     @Column(length=20)
     private String major;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
