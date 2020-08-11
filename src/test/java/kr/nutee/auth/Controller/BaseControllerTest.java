@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class BaseControllerTest {
 
     protected String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZjAwMDEiLCJyb2xlIjoiUk9MRV9NQU5BR0VSIiwiaWQiOjEsImV4cCI6MTkxMjA2NDU4NiwiaWF0IjoxNTk2NzA0NTg2fQ.VmpRq6R0NhyteAp2ToaPPbjAANcSfZTMKvrXxCd3iFBcm3gVLn9GYd6lJQ07gRIyk_U38x4t7VEpzA2qcbMAgA";
+    protected String refresh = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJtZjAwMDEiLCJpYXQiOjE1OTY5ODMxNjQsImV4cCI6MTYxMjUzNTE2NH0.6UqF-2kaLYbonMsbhJYIJr5ezJEFo30jzQ_4K16haja286kdn4ajv93mlHJJL4NaZS5xOjYFwBA-523cYS06dw";
 
     @Autowired
     protected MockMvc mockMvc;

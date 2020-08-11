@@ -1,5 +1,6 @@
 package kr.nutee.auth.Domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import kr.nutee.auth.Enum.RoleType;
 import lombok.*;
 import javax.persistence.*;
@@ -32,10 +33,12 @@ public class Member extends LogDateTime {
     @OneToOne (mappedBy = "member")
     private Image image;
 
+    @JsonManagedReference
     @OneToMany (mappedBy = "member")
     @Builder.Default
     private List<Interest> interests = new ArrayList<>();
 
+    @JsonManagedReference
     @OneToMany (mappedBy = "member")
     @Builder.Default
     private List<Major> majors = new ArrayList<>();

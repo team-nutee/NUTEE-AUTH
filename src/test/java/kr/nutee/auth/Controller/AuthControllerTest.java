@@ -1,8 +1,8 @@
 package kr.nutee.auth.Controller;
 
 import kr.nutee.auth.Common.RestDocsConfiguration;
-import kr.nutee.auth.DTO.Request.SendOTP;
-import kr.nutee.auth.DTO.Request.SignupDTO;
+import kr.nutee.auth.DTO.Request.*;
+import kr.nutee.auth.DTO.Token;
 import kr.nutee.auth.Repository.MemberRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +15,6 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -154,6 +153,446 @@ class AuthControllerTest extends BaseControllerTest {
                         ),
                         requestFields(
                                 fieldWithPath("schoolEmail").description("title of new post(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(3)
+    @DisplayName("ID 중복체크")
+    void checkId() throws Exception {
+
+        //given
+        String userId = "mf0004";
+        CheckIdDTO body = CheckIdDTO.builder()
+                .userId(userId)
+                .build();
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/checkid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").value("아이디 중복체크 성공."))
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("check-id",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("userId").description("title of new post(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(4)
+    @DisplayName("닉네임 중복체크")
+    void checkNickname() throws Exception {
+
+        //given
+        String nickname = "moon4";
+        CheckNicknameDTO body = CheckNicknameDTO
+                .builder()
+                .nickname(nickname)
+                .build();
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/checknickname")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").value("닉네임 중복 체크 성공."))
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("check-nickname",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("nickname").description("title of new post(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(5)
+    @DisplayName("이메일 중복체크")
+    void checkEmail() throws Exception {
+
+        //given
+        String email = "mf0004@gmail.com";
+        CheckEmailDTO body = CheckEmailDTO
+                .builder()
+                .schoolEmail(email)
+                .build();
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/checkemail")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").value("이메일 중복 체크 성공."))
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("check-email",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("schoolEmail").description("title of new post(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(6)
+    @DisplayName("OTP 체크")
+    void checkOTP() throws Exception {
+
+        //given
+        String otp = "000000";
+        CheckOtpDTO body = CheckOtpDTO
+                .builder()
+                .otp(otp)
+                .build();
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/checkotp")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").value("OTP 인증 성공."))
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("check-otp",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("otp").description("title of new post(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(7)
+    @DisplayName("로그인 성공")
+    void login() throws Exception {
+
+        //given
+        String userId = "mf0001";
+        String password = "P@ssw0rd";
+        LoginDTO body = LoginDTO.builder()
+                .userId(userId)
+                .password(password)
+                .build();
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").exists())
+                .andExpect(jsonPath("body.accessToken").exists())
+                .andExpect(jsonPath("body.refreshToken").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("login",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("userId").description("user's id(not null)"),
+                                fieldWithPath("password").description("user's password(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("body.accessToken").description("accessToken(30 Minutes)"),
+                                fieldWithPath("body.refreshToken").description("refreshToken(6 Months)"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(8)
+    @DisplayName("리프레시 성공")
+    void refresh() throws Exception {
+
+        //given
+        RefreshRequest body = RefreshRequest.builder()
+                .accessToken(token)
+                .refreshToken(refresh)
+                .build();
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").exists())
+                .andExpect(jsonPath("body.accessToken").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("refresh",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("accessToken").description("user's id(not null)"),
+                                fieldWithPath("refreshToken").description("user's password(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("body.accessToken").description("accessToken(30 Minutes)"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(9)
+    @DisplayName("로그아웃 성공")
+    void logout() throws Exception {
+
+        //given
+        LogoutRequest body = LogoutRequest.builder()
+                .accessToken(token)
+                .build();
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/logout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").value("로그아웃에 성공했습니다."))
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("logout",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("accessToken").description("user's id(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(10)
+    @DisplayName("아이디 찾기 성공")
+    void findId() throws Exception {
+
+        //given
+        String schoolEmail = "mf0003@gmail.com";
+        String userId = "mf0003";
+        FindIdRequest body = FindIdRequest.builder()
+                .schoolEmail(schoolEmail)
+                .build();
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/findid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").value(userId))
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("find-id",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("schoolEmail").description("user's email(not null)")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+    }
+
+    @Test @Order(11)
+    @DisplayName("비밀번호 찾기 성공")
+    void findPassword() throws Exception {
+
+        //given
+        String userId = "mf0003";
+        String email = "mf0003@gmail.com";
+        FindPassWordRequest body = FindPassWordRequest.builder()
+                .userId(userId)
+                .schoolEmail(email)
+                .build();
+
+        //when
+        MockHttpServletRequestBuilder builder = post("/auth/findpw")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").value("새 비밀번호를 메일로 전송하였습니다."))
+                .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("find-password",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("schoolEmail").description("user's email(not null)"),
+                                fieldWithPath("userId").description("user's id(not null)")
                         ),
                         responseHeaders(
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")

@@ -27,23 +27,23 @@ public class MemberService {
         return memberRepository.save(member);
     }
     public Member getUser(String userId){
-        return memberRepository.findByUserId(userId);
+        return memberRepository.findMemberByUserId(userId);
     }
 
-    public Boolean userIdCheck(String userId){
-        return memberRepository.findByUserId(userId) == null;
+    public Boolean checkUserId(String userId){
+        return memberRepository.findMemberByUserId(userId) == null;
     }
 
-    public Boolean nicknameCheck(String nickname){
-        return memberRepository.findByNickname(nickname) == null;
+    public Boolean checkNickname(String nickname){
+        return memberRepository.findMemberByNickname(nickname) == null;
     }
 
-    public Boolean emailCheck(String email){
-        if(email.equals("nutee.skhu.2020@gmail.com")){//관리자계정
+    public Boolean checkEmail(String email){
+        String adminEmail = "nutee.skhu.2020@gmail.com";
+        if(email.equals(adminEmail)){
             return true;
-        }else{
-            return memberRepository.findBySchoolEmail(email) == null;
         }
+        return memberRepository.findMemberBySchoolEmail(email) == null;
     }
 
 }

@@ -81,23 +81,24 @@ public class AuthService {
         });
     }
 
-    public Member findId(Member member){
-        return memberRepository.findBySchoolEmail(member.getSchoolEmail());
+    public Member findId(String schoolEmail){
+        return memberRepository.findMemberBySchoolEmail(schoolEmail);
     }
 
-    public void findPassword(Member member){
+    @Transactional
+    public void findPassword(String schoolEmail, String userId){
         try {
             MimeMessage message = new MimeMessage(getEmailSession());
             message.setFrom(new InternetAddress(mailId));
 
             //수신자메일주소
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(member.getSchoolEmail()));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(schoolEmail));
 
             //메일 제목 설정
             message.setSubject("[NUTEE] 새로 설정 된 비밀번호를 확인해 주세요."); //메일 제목을 입력
 
             //비밀번호 새로 설정
-            member = memberRepository.findByUserId(member.getUserId());
+            Member member = memberRepository.findMemberByUserId(userId);
             String newPw = generateNewPassword();
             member.setPassword(bcryptEncoder.encode(newPw));
             memberRepository.save(member);
@@ -165,13 +166,13 @@ public class AuthService {
 
     @Transactional
     public UserData signUp(SignupDTO signupDTO){
-        if(!memberService.userIdCheck(signupDTO.getUserId())){
+        if(!memberService.checkUserId(signupDTO.getUserId())){
             throw new ConflictException("아이디가 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
         }
-        if(!memberService.nicknameCheck(signupDTO.getNickname())){
+        if(!memberService.checkNickname(signupDTO.getNickname())){
             throw new ConflictException("닉네임이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
         }
-        if(!memberService.emailCheck(signupDTO.getSchoolEmail())){
+        if(!memberService.checkEmail(signupDTO.getSchoolEmail())){
             throw new ConflictException("이메일이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
         }
         if(!authService.checkOtp(signupDTO.getOtp())){

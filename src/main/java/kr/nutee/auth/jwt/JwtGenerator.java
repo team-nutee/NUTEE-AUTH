@@ -46,7 +46,7 @@ public class JwtGenerator implements Serializable {
         for (GrantedAuthority a: userDetails.getAuthorities()) {
             li.add(a.getAuthority());
         }
-        claims.put("id",memberRepository.findByUserId(userDetails.getUsername()).getId());
+        claims.put("id",memberRepository.findMemberByUserId(userDetails.getUsername()).getId());
         claims.put("role",li.get(0));
         return Jwts.builder()
                 .setClaims(claims)
