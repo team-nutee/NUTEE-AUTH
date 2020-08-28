@@ -220,7 +220,7 @@ public class AuthService {
     }
 
     public Boolean checkOtp(String otp){
-        return otpRepository.findByOtpNumber(otp) != null;
+        return otpRepository.findOtpByOtpNumber(otp) != null;
     }
 
 }

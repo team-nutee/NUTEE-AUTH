@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
-@ActiveProfiles("test")
 @Disabled
 public class BaseControllerTest {
 
