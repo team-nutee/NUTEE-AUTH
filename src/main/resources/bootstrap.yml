@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: auth
+  profiles:
+    active: dev
+  cloud:
+    config:
+      uri: http://3.34.210.128:8888
