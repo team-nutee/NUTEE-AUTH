@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Response> conflictException(BusinessException e) {
         Response res = Response.builder()
-                .code(23)
+                .code(24)
                 .message(e.getMessage())
                 .body(null)
                 .build();
