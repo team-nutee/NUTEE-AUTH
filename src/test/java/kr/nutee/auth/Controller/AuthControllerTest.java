@@ -4,9 +4,12 @@ import kr.nutee.auth.Common.RestDocsConfiguration;
 import kr.nutee.auth.DTO.Request.*;
 import kr.nutee.auth.DTO.Token;
 import kr.nutee.auth.Repository.MemberRepository;
+import kr.nutee.auth.Service.AuthService;
+import kr.nutee.auth.Service.MemberService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
@@ -27,29 +30,46 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Import(RestDocsConfiguration.class)
-@ExtendWith(RestDocumentationExtension.class)
-@Transactional
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthControllerTest extends BaseControllerTest {
 
     @Autowired
     MemberRepository memberRepository;
 
+    @Autowired
+    AuthService authService;
+
+    @BeforeEach
+    void setMember() {
+        List<String> interests = List.of("INTER1","INTER2");
+
+        List<String> majors = List.of("MAJOR1","MAJOR2");
+
+        SignupDTO body = SignupDTO.builder()
+                .userId("mf0001")
+                .password("P@ssw0rd")
+                .nickname("moon1")
+                .schoolEmail("mf0001@gmail.com")
+                .otp("000000")
+                .interests(interests)
+                .majors(majors)
+                .build();
+
+        authService.signUp(body);
+    }
+
     @Test @Order(1)
     @DisplayName("회원가입")
     void signUp() throws Exception {
-
         //given
         List<String> interests = List.of("INTER1","INTER2");
 
         List<String> majors = List.of("MAJOR1","MAJOR2");
 
         SignupDTO body = SignupDTO.builder()
-                .userId("mf0004")
+                .userId("mf0002")
                 .password("P@ssw0rd")
-                .nickname("moon4")
-                .schoolEmail("mf0004@gmail.com")
+                .nickname("moon2")
+                .schoolEmail("mf0002@gmail.com")
                 .otp("000000")
                 .interests(interests)
                 .majors(majors)
@@ -71,7 +91,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("message").exists())
                 .andExpect(jsonPath("body").exists())
                 .andExpect(jsonPath("body.id").exists())
-                .andExpect(jsonPath("body.nickname").value("moon4"))
+                .andExpect(jsonPath("body.nickname").value("moon2"))
                 .andExpect(jsonPath("body.image").doesNotExist())
                 .andExpect(jsonPath("body.interests[0]").value("INTER1"))
                 .andExpect(jsonPath("body.interests[1]").value("INTER2"))
@@ -512,8 +532,8 @@ class AuthControllerTest extends BaseControllerTest {
     void findId() throws Exception {
 
         //given
-        String schoolEmail = "mf0003@gmail.com";
-        String userId = "mf0003";
+        String schoolEmail = "mf0001@gmail.com";
+        String userId = "mf0001";
         FindIdRequest body = FindIdRequest.builder()
                 .schoolEmail(schoolEmail)
                 .build();
@@ -560,8 +580,8 @@ class AuthControllerTest extends BaseControllerTest {
     void findPassword() throws Exception {
 
         //given
-        String userId = "mf0003";
-        String email = "mf0003@gmail.com";
+        String userId = "mf0001";
+        String email = "mf0001@gmail.com";
         FindPassWordRequest body = FindPassWordRequest.builder()
                 .userId(userId)
                 .schoolEmail(email)
