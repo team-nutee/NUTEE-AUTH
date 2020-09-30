@@ -48,7 +48,6 @@ public class AuthController {
     private final JwtUserDetailsService userDetailsService;
     private final JwtGenerator jwtGenerator;
     private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder bcryptEncoder;
 
     /*
         내용 : 회원가입
