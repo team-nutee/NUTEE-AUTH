@@ -75,6 +75,10 @@ bootJar {
     }
 }
 
+compileJava.options.encoding("UTF-8")
 tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+    options.encoding("UTF-8")
+}
+allprojects {
+    System.setProperty('JAVA_TOOL_OPTIONS', "-Dfile.encoding=UTF8")
 }
