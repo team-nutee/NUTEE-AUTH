@@ -339,6 +339,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .builder()
                 .otp(otp)
                 .build();
+
         //when
         MockHttpServletRequestBuilder builder = post("/auth/checkotp")
                 .contentType(MediaType.APPLICATION_JSON)
