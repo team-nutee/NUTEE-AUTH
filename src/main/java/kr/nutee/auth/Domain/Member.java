@@ -1,53 +1,54 @@
 package kr.nutee.auth.Domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-import lombok.experimental.Delegate;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.Length;
-import org.springframework.data.redis.core.RedisHash;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import kr.nutee.auth.Enum.RoleType;
+import lombok.*;
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Data
 @Entity
-public class Member implements Serializable {
-
-    private static final long serialVersionUID = -7353484588260422449L;
-
-
+@Getter @Setter
+@Builder @NoArgsConstructor @AllArgsConstructor
+public class Member extends LogDateTime {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
+
+    @Column(nullable=false, unique=true, length=20)
+    private String userId;
 
     @Column(nullable=false, unique=true, length=20)
     private String nickname;
 
-    @Column(nullable=false, unique=true, length=50)
-    private String userId;
-
-    @Column(nullable=false, unique=true, length=50)
+    @Column(nullable=false, length=50)
     private String schoolEmail;
 
-    @Length(min=8, max=200)
     private String password;
 
-    @CreationTimestamp
-    private Date createdAt;
+    private LocalDateTime accessedAt;
 
-    @UpdateTimestamp
-    private Date updatedAt;
+    @OneToOne (mappedBy = "member")
+    private Image image;
 
-    private Date accessAt;
+    @JsonManagedReference
+    @OneToMany (mappedBy = "member")
+    @Builder.Default
+    private List<Interest> interests = new ArrayList<>();
 
-    private int grade;
+    @JsonManagedReference
+    @OneToMany (mappedBy = "member")
+    @Builder.Default
+    private List<Major> majors = new ArrayList<>();
 
-    /*
-    @Column(columnDefinition = "integer default 0")
-    private int email_status;
-    */
+    @Enumerated(EnumType.STRING)
+    @Column(length=20)
+    private RoleType role;
+
+    private boolean isDeleted;
+
+    private boolean isBlocked;
+
 }
-
