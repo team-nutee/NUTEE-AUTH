@@ -5,6 +5,7 @@ plugins {
     id 'org.asciidoctor.convert' version '1.5.3'
 }
 
+archivesBaseName = 'nutee-auth'
 group = 'kr.nutee'
 version = '0.0.1-SNAPSHOT'
 description = 'nutee-auth'
