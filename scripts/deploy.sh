@@ -17,7 +17,7 @@ else
     sleep 5
 fi
 
-echo "> 새 어플리케이션 배포"
+echo "> 새 애플리케이션 배포"
 
 echo "> Build 파일 복사"
 
