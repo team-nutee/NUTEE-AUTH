@@ -176,7 +176,7 @@ public class AuthService {
             throw new ConflictException("이메일이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
         }
         if(!authService.checkOtp(signupDTO.getOtp())){
-            throw new ConflictException("교내 이메일 인증에 실패 하였습니다.", ErrorCode.CONFLICT, HttpStatus.UNAUTHORIZED);
+            throw new ConflictException("교내 이메일 인증에 실패 하였습니다."+signupDTO.getOtp(), ErrorCode.CONFLICT, HttpStatus.UNAUTHORIZED);
         }
 
         String password = bcryptEncoder.encode(signupDTO.getPassword());
