@@ -626,4 +626,53 @@ class AuthControllerTest extends BaseControllerTest {
                         )
                 ));
     }
+
+    @Test
+    @Order(12)
+    @DisplayName("비밀번호 변경 성공")
+    void getUser() throws Exception {
+        //given
+        String password = "P@ssw0rd";
+        ChangePasswordRequest body = ChangePasswordRequest.builder()
+                .password(password)
+                .build();
+
+        //when
+        MockHttpServletRequestBuilder builder = patch("/auth/user/1/password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(body));
+
+        //then
+        mockMvc.perform(builder)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("body").isEmpty())
+                .andDo(document("change-password",
+                        links(
+                                linkWithRel("self").description("link to self")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        requestFields(
+                                fieldWithPath("password").description("new password you want")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("label code number"),
+                                fieldWithPath("message").description("message"),
+                                fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("_links.self.href").description("link to self")
+                        )
+                ));
+
+    }
 }

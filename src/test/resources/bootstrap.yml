@@ -1,3 +1,5 @@
+jwt:
+  secret: nutee
 spring:
   application:
     name: auth
