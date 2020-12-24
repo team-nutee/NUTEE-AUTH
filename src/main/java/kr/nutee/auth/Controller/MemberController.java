@@ -34,6 +34,7 @@ public class MemberController {
             @PathVariable String memberId
     ) {
         Member user = memberService.getUser(request);
+        System.out.println(Long.parseLong(memberId));
         memberService.changePassword(user.getId(),Long.parseLong(memberId),body.getPassword());
         Response response = Response.builder()
                 .code(10)
