@@ -28,7 +28,7 @@ jobs:
           java-version: 11.0.8
 
       - name: Grant execute permissions
-        run: chmod +x gradlew scripts/deploy.sh scripts/execute-deploy.sh
+        run: chmod +x gradlew scripts/deploy.sh
         shell: bash
 
       - name: Build with Gradle
