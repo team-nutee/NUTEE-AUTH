@@ -27,4 +27,4 @@ JAR_NAME=$(ls $DEPLOY/ |grep 'nutee-auth' | tail -n 1)
 
 echo "> JAR Name: $JAR_NAME"
 
-nohup java -jar $DEPLOY/$JAR_NAME /dev/null 2> /dev/null < /dev/null &
+nohup java -jar $DEPLOY/$JAR_NAME 1>/dev/null 2>&1 &
