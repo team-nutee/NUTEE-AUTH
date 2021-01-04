@@ -103,11 +103,12 @@ public class GlobalExceptionHandler {
 //    }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public Map<String, Object> badCredentialEx(Exception e) {
-        log.warn("BadCredentialsException" + e.getClass());
+    public ResponseEntity<Object> badCredentialEx(Exception e) {
         Map<String, Object> map = new HashMap<>();
-        map.put("errorCode", 63);
-        return map;
+        map.put("code", 63);
+        map.put("message","비밀번호 불일치");
+        log.warn("BadCredentialsException" + e.getClass());
+        return new ResponseEntity<>(map,HttpStatus.FORBIDDEN);
     }
 
     private ResponseResource getResponseResource(BusinessException e, Response response) {
