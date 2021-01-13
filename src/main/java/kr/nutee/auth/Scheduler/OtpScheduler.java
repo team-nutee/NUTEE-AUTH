@@ -1,6 +1,7 @@
 package kr.nutee.auth.Scheduler;
 
 import kr.nutee.auth.Repository.OtpRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,9 +15,10 @@ import java.util.Date;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OtpScheduler {
-    @Autowired
-    OtpRepository otpRepository;
+
+    private final OtpRepository otpRepository;
 
     @Scheduled(cron = "0 * * * * *")//매 분 0초에 실행한다.
     @Transactional
@@ -25,7 +27,7 @@ public class OtpScheduler {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.MINUTE,-3);
-        System.out.println(format.format(cal.getTime()));
+        log.info(format.format(cal.getTime()));
         otpRepository.deleteAllByCreatedAtLessThan(cal.getTime());
     }
 }

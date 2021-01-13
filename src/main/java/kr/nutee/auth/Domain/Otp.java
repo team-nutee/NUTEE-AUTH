@@ -1,5 +1,12 @@
 package kr.nutee.auth.Domain;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Transient;
+import kr.nutee.auth.Enum.RoleType;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -8,21 +15,22 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.util.Date;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
+@Document(collection = "otps")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Otp {
+    @Transient
+    public static final String SEQUENCE_NAME = "otps_sequence";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
-    String otpNumber;
+    private String otpNumber;
 
-    @CreationTimestamp
-    private Date createdAt;
+    private LocalDateTime createdAt;
 }

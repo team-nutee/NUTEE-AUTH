@@ -1,50 +1,50 @@
 package kr.nutee.auth.Domain;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import kr.nutee.auth.Enum.RoleType;
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Getter @Setter
-@Builder @NoArgsConstructor @AllArgsConstructor
-public class Member extends LogDateTime {
-    @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name = "member_id")
-    private Long id;
+@Document(collection = "members")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
 
-    @Column(nullable=false, unique=true, length=20)
+@AllArgsConstructor
+public class Member {
+
+    @Transient
+    public static final String SEQUENCE_NAME = "members_sequence";
+
+    @Id
+    private long id;
+
     private String userId;
 
-    @Column(nullable=false, unique=true, length=20)
     private String nickname;
 
-    @Column(nullable=false, length=50)
     private String schoolEmail;
 
     private String password;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     private LocalDateTime accessedAt;
 
-    @OneToOne (mappedBy = "member")
-    private Image image;
+    private String imageUrl;
 
-    @JsonManagedReference
-    @OneToMany (mappedBy = "member")
-    @Builder.Default
-    private List<Interest> interests = new ArrayList<>();
+    private List<String> interests = new ArrayList<>();
 
-    @JsonManagedReference
-    @OneToMany (mappedBy = "member")
-    @Builder.Default
-    private List<Major> majors = new ArrayList<>();
+    private List<String> majors = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(length=20)
     private RoleType role;
 
     private boolean isDeleted;

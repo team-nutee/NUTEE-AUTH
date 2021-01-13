@@ -7,10 +7,8 @@ import kr.nutee.auth.Enum.ErrorCode;
 import kr.nutee.auth.Enum.RoleType;
 import kr.nutee.auth.Exception.NotAllowedException;
 import kr.nutee.auth.Repository.MemberRepository;
-import kr.nutee.auth.Repository.OtpRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,20 +16,14 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class MemberService {
 
-    @Autowired
-    MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    OtpRepository otpRepository;
-
-    @Autowired
-    PasswordEncoder bcryptEncoder;
+    private final PasswordEncoder bcryptEncoder;
 
     @Value("${jwt.secret}")
     String secretKey;

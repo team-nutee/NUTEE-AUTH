@@ -5,6 +5,7 @@ import kr.nutee.auth.Repository.MemberRepository;
 import kr.nutee.auth.Service.AuthService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,6 +28,9 @@ class AuthControllerTest extends BaseControllerTest {
     MemberRepository memberRepository;
 
     @Autowired
+    MongoTemplate mongoTemplate;
+
+    @Autowired
     AuthService authService;
 
     @BeforeEach
@@ -46,6 +50,13 @@ class AuthControllerTest extends BaseControllerTest {
                 .build();
 
         authService.signUp(body);
+    }
+
+    @AfterEach
+    void dropCollection() {
+        mongoTemplate.dropCollection("members");
+        mongoTemplate.dropCollection("otps");
+        mongoTemplate.dropCollection("database_sequences");
     }
 
     @Test
