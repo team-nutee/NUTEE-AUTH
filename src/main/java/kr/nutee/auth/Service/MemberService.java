@@ -33,6 +33,7 @@ public class MemberService {
     @Autowired
     PasswordEncoder bcryptEncoder;
 
+
     @Value("${jwt.secret}")
     String secretKey;
 
@@ -51,7 +52,6 @@ public class MemberService {
         String token = request.getHeader("Authorization").split(" ")[1];
         Claims body = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         Long memberId = body.get("id", Long.class);
-        System.out.println(memberId);
         return memberRepository.findMemberById(memberId);
     }
 

@@ -11,6 +11,7 @@ import kr.nutee.auth.Domain.Member;
 import kr.nutee.auth.Enum.ErrorCode;
 import kr.nutee.auth.Exception.ConflictException;
 import kr.nutee.auth.Exception.NotExistException;
+import kr.nutee.auth.Repository.MemberRepository;
 import kr.nutee.auth.jwt.JwtGenerator;
 import kr.nutee.auth.Service.AuthService;
 import kr.nutee.auth.Service.JwtUserDetailsService;
@@ -46,6 +47,7 @@ public class AuthController {
     private final AuthService authService;
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtUserDetailsService userDetailsService;
+    private final MemberRepository memberRepository;
     private final JwtGenerator jwtGenerator;
     private final AuthenticationManager authenticationManager;
 
@@ -177,11 +179,13 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
         final String accessToken = jwtGenerator.generateAccessToken(userDetails);
         final String refreshToken = jwtGenerator.generateRefreshToken(userId);
+        final Long memberId = memberRepository.findMemberByUserId(userId).getId();
 
         //refreshToken -> redis
         stringRedisTemplate.opsForValue().set("refresh-" + userId, refreshToken);
 
         LoginResponse body = LoginResponse.builder()
+                .memberId(memberId)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

@@ -443,6 +443,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("code").exists())
                 .andExpect(jsonPath("message").exists())
                 .andExpect(jsonPath("body").exists())
+                .andExpect(jsonPath("body.memberId").exists())
                 .andExpect(jsonPath("body.accessToken").exists())
                 .andExpect(jsonPath("body.refreshToken").exists())
                 .andExpect(jsonPath("_links.self").exists())
@@ -465,6 +466,7 @@ class AuthControllerTest extends BaseControllerTest {
                                 fieldWithPath("code").description("label code number"),
                                 fieldWithPath("message").description("message"),
                                 fieldWithPath("body").description("body of the response"),
+                                fieldWithPath("body.memberId").description("memberId"),
                                 fieldWithPath("body.accessToken").description("accessToken(30 Minutes)"),
                                 fieldWithPath("body.refreshToken").description("refreshToken(6 Months)"),
                                 fieldWithPath("_links.self.href").description("link to self")
