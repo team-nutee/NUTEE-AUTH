@@ -24,14 +24,4 @@ public class RestDocsConfiguration {
                 .withResponseDefaults(prettyPrint());
     }
 
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-        return restTemplateBuilder
-                .requestFactory(() -> new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory()))
-                .setConnectTimeout(Duration.ofMillis(20000)) // connection-timeout
-                .setReadTimeout(Duration.ofMillis(20000)) // read-timeout
-                .additionalMessageConverters(new StringHttpMessageConverter(StandardCharsets.UTF_8))
-                .build();
-    }
-
 }
