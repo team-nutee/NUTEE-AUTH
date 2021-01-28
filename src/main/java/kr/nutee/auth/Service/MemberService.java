@@ -2,6 +2,7 @@ package kr.nutee.auth.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import java.util.List;
 import kr.nutee.auth.Domain.Member;
 import kr.nutee.auth.Enum.ErrorCode;
 import kr.nutee.auth.Enum.RoleType;
@@ -38,13 +39,36 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public Member getUser(HttpServletRequest request){
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+    public Member getUserBy(HttpServletRequest request){
+        String newSecretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
         String token = request.getHeader("Authorization").split(" ")[1];
-        Claims body = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        Claims body = Jwts.parser().setSigningKey(newSecretKey).parseClaimsJws(token).getBody();
         Long memberId = body.get("id", Long.class);
-        System.out.println(memberId);
         return memberRepository.findMemberById(memberId);
+    }
+
+    public String changeNickname(Member member, String nickname) {
+        member.setNickname(nickname);
+        Member updatedMember = memberRepository.save(member);
+        return updatedMember.getNickname();
+    }
+
+    public List<String> changeInterests(Member member, List<String> interests) {
+        member.setInterests(interests);
+        Member updatedMember = memberRepository.save(member);
+        return updatedMember.getInterests();
+    }
+
+    public List<String> changeMajors(Member member, List<String> majors) {
+        member.setMajors(majors);
+        Member updatedMember = memberRepository.save(member);
+        return updatedMember.getInterests();
+    }
+
+    public String changeProfile(Member member, String profileUrl) {
+        member.setProfileUrl(profileUrl);
+        Member updatedMember = memberRepository.save(member);
+        return updatedMember.getProfileUrl();
     }
 
     public void changePassword(Long memberId, Long requestId, String password) {

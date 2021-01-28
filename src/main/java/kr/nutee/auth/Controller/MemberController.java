@@ -1,17 +1,19 @@
 package kr.nutee.auth.Controller;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import java.util.List;
+import kr.nutee.auth.DTO.Request.ChangeInterestsRequest;
+import kr.nutee.auth.DTO.Request.ChangeMajorsRequest;
+import kr.nutee.auth.DTO.Request.ChangeNicknameRequest;
 import kr.nutee.auth.DTO.Request.ChangePasswordRequest;
+import kr.nutee.auth.DTO.Request.ChangeProfileRequest;
 import kr.nutee.auth.DTO.Resource.ResponseResource;
 import kr.nutee.auth.DTO.Response.Response;
+import kr.nutee.auth.DTO.Response.SuccessResponse;
+import kr.nutee.auth.DTO.Response.UserData;
 import kr.nutee.auth.Domain.Member;
-import kr.nutee.auth.Enum.ErrorCode;
-import kr.nutee.auth.Exception.ConflictException;
 import kr.nutee.auth.Service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,20 +29,122 @@ public class MemberController {
 
     private final MemberService memberService;
 
+
+    /*
+        나의 데이터 호출
+     */
+    @GetMapping("/me")
+    public ResponseEntity<ResponseResource> getMyUserData(
+        HttpServletRequest request
+    ) {
+        Member user = memberService.getUserBy(request);
+        UserData userData = new UserData(user);
+        Response response = Response.builder()
+            .code(10)
+            .message("SUCCESS")
+            .body(userData)
+            .build();
+        ResponseResource resource = new ResponseResource(response, MemberController.class, "/me");
+        return ResponseEntity.ok().body(resource);
+    }
+
+    /*
+        유저 데이터 호출
+     */
+    @GetMapping("/{memberId}")
+    public ResponseEntity<ResponseResource> getUserData(
+        HttpServletRequest request,
+        @PathVariable Long memberId
+    ) {
+        UserData userData = new UserData(memberService.getUserBy(request));
+        Response response = Response.builder()
+            .code(10)
+            .message("SUCCESS")
+            .body(userData)
+            .build();
+        ResponseResource resource = new ResponseResource(response, MemberController.class,
+            "/user/" + memberId);
+        return ResponseEntity.ok().body(resource);
+    }
+
+    /*
+        유저 닉네임 변경
+     */
+    @PatchMapping("/nickname")
+    public ResponseEntity<ResponseResource> changeNickname(
+        HttpServletRequest request,
+        @RequestBody ChangeNicknameRequest body
+    ) {
+        Member user = memberService.getUserBy(request);
+        String changedNickname = memberService.changeNickname(user, body.getNickname());
+        Response response = new SuccessResponse(changedNickname);
+        ResponseResource resource = new ResponseResource(response,MemberController.class, "/nickname");
+        return ResponseEntity.ok().body(resource);
+    }
+
+    /*
+        유저 비밀번호 변경
+     */
     @PatchMapping("/{memberId}/password")
     public ResponseEntity<ResponseResource> changePassword(
-            @RequestBody ChangePasswordRequest body,
-            HttpServletRequest request,
-            @PathVariable String memberId
+        @RequestBody ChangePasswordRequest body,
+        HttpServletRequest request,
+        @PathVariable String memberId
     ) {
-        Member user = memberService.getUser(request);
-        System.out.println(Long.parseLong(memberId));
-        memberService.changePassword(user.getId(),Long.parseLong(memberId),body.getPassword());
+        Member user = memberService.getUserBy(request);
+        memberService.changePassword(user.getId(), Long.parseLong(memberId), body.getPassword());
         Response response = Response.builder()
-                .code(10)
-                .message("SUCCESS")
-                .build();
-        ResponseResource resource = new ResponseResource(response, MemberController.class,user.getId()+"/password");
+            .code(10)
+            .message("SUCCESS")
+            .body(null)
+            .build();
+        ResponseResource resource = new ResponseResource(response, MemberController.class,
+            user.getId() + "/password");
+        return ResponseEntity.ok().body(resource);
+    }
+
+    /*
+        유저 프로필 이미지 변경
+     */
+    @PatchMapping("/profile")
+    public ResponseEntity<ResponseResource> changeProfile(
+        @RequestBody ChangeProfileRequest body,
+        HttpServletRequest request
+    ) {
+        Member user = memberService.getUserBy(request);
+        String newProfileUrl = memberService.changeProfile(user, body.getProfileUrl());
+        Response response = new SuccessResponse(newProfileUrl);
+        ResponseResource resource = new ResponseResource(response, MemberController.class, "/profile");
+        return ResponseEntity.ok().body(resource);
+    }
+
+    /*
+        유저 흥미 목록 변경
+     */
+    @PatchMapping("/interests")
+    public ResponseEntity<ResponseResource> changeInterests(
+        @RequestBody ChangeInterestsRequest body,
+        HttpServletRequest request
+    ) {
+        Member user = memberService.getUserBy(request);
+        List<String> newInterests = memberService.changeInterests(user,body.getInterests());
+        Response response = new SuccessResponse(newInterests);
+        ResponseResource resource = new ResponseResource(response, MemberController.class, "/interests");
+        return ResponseEntity.ok().body(resource);
+    }
+
+    /*
+        유저 전공 변경
+     */
+    @PatchMapping("/majors")
+    public ResponseEntity<ResponseResource> changeMajors(
+        @RequestBody ChangeMajorsRequest body,
+        HttpServletRequest request
+    ) {
+        Member user = memberService.getUserBy(request);
+        List<String> newMajors = memberService.changeInterests(user,body.getMajors());
+        Response response = new SuccessResponse(newMajors);
+        ResponseResource resource = new ResponseResource(response, MemberController.class, "/majors");
         return ResponseEntity.ok().body(resource);
     }
 

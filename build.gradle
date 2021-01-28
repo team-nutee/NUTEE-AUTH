@@ -39,6 +39,7 @@ dependencies {
     testCompile 'org.springframework.restdocs:spring-restdocs-mockmvc:2.0.2.RELEASE'
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.200'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.1.RELEASE'
     compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-config', version: '2.2.4.RELEASE'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

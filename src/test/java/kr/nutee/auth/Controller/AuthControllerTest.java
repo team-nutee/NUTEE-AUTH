@@ -1,15 +1,14 @@
 package kr.nutee.auth.Controller;
 
 import kr.nutee.auth.DTO.Request.*;
-import kr.nutee.auth.Repository.MemberRepository;
 import kr.nutee.auth.Service.AuthService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import java.util.List;
 
@@ -25,18 +24,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthControllerTest extends BaseControllerTest {
 
     @Autowired
-    MemberRepository memberRepository;
-
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    @Autowired
     AuthService authService;
+
+    final ResultMatcher MEMBER_EXPECT = ResultMatcher.matchAll(
+        jsonPath("body.id").exists(),
+        jsonPath("body.nickname").value("moon2"),
+        jsonPath("body.profileUrl").isEmpty(),
+        jsonPath("body.interests[0]").value("INTER1"),
+        jsonPath("body.interests[1]").value("INTER2"),
+        jsonPath("body.majors[0]").value("MAJOR1"),
+        jsonPath("body.majors[1]").value("MAJOR2")
+    );
 
     @BeforeEach
     void setMember() {
         List<String> interests = List.of("INTER1","INTER2");
-
         List<String> majors = List.of("MAJOR1","MAJOR2");
 
         SignupDTO body = SignupDTO.builder()
@@ -59,55 +61,6 @@ class AuthControllerTest extends BaseControllerTest {
         mongoTemplate.dropCollection("database_sequences");
     }
 
-    @Test
-    @Order(0)
-    @DisplayName("비밀번호 변경 성공")
-    void getUser() throws Exception {
-        //given
-        String password = "P@ssw0rd";
-        ChangePasswordRequest body = ChangePasswordRequest.builder()
-                .password(password)
-                .build();
-
-        //when
-        MockHttpServletRequestBuilder builder = patch("/auth/user/1/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
-                .accept(MediaTypes.HAL_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(body));
-
-        //then
-        mockMvc.perform(builder)
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8"))
-                .andExpect(jsonPath("code").exists())
-                .andExpect(jsonPath("message").exists())
-                .andExpect(jsonPath("body").isEmpty())
-                .andDo(document("change-password",
-                        links(
-                                linkWithRel("self").description("link to self")
-                        ),
-                        requestHeaders(
-                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
-                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
-                        ),
-                        requestFields(
-                                fieldWithPath("password").description("new password you want")
-                        ),
-                        responseHeaders(
-                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentType header")
-                        ),
-                        responseFields(
-                                fieldWithPath("code").description("label code number"),
-                                fieldWithPath("message").description("message"),
-                                fieldWithPath("body").description("body of the response"),
-                                fieldWithPath("_links.self.href").description("link to self")
-                        )
-                ));
-
-    }
-
     @Test @Order(1)
     @DisplayName("회원가입")
     void signUp() throws Exception {
@@ -126,9 +79,8 @@ class AuthControllerTest extends BaseControllerTest {
                 .majors(majors)
                 .build();
 
-
         //when
-        MockHttpServletRequestBuilder builder = post("/auth/signup")
+        MockHttpServletRequestBuilder builder = post("/auth/member")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -141,16 +93,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("code").exists())
                 .andExpect(jsonPath("message").exists())
                 .andExpect(jsonPath("body").exists())
-                .andExpect(jsonPath("body.id").exists())
-                .andExpect(jsonPath("body.nickname").value("moon2"))
-                .andExpect(jsonPath("body.image").doesNotExist())
-                .andExpect(jsonPath("body.interests[0]").value("INTER1"))
-                .andExpect(jsonPath("body.interests[1]").value("INTER2"))
-                .andExpect(jsonPath("body.majors[0]").value("MAJOR1"))
-                .andExpect(jsonPath("body.majors[1]").value("MAJOR2"))
-                .andExpect(jsonPath("body.postNum").value(0))
-                .andExpect(jsonPath("body.commentNum").value(0))
-                .andExpect(jsonPath("body.likeNum").value(0))
+                .andExpect(MEMBER_EXPECT)
                 .andExpect(jsonPath("_links.self").exists())
                 .andDo(document("sign-up",
                         links(
@@ -179,12 +122,9 @@ class AuthControllerTest extends BaseControllerTest {
                                 fieldWithPath("body").description("body of the response"),
                                 fieldWithPath("body.id").description("user's id"),
                                 fieldWithPath("body.nickname").description("user's nickname"),
-                                fieldWithPath("body.image").type(JsonFieldType.OBJECT).description("user's image").optional(),
+                                fieldWithPath("body.profileUrl").description("user's image"),
                                 fieldWithPath("body.interests").description("user's interests"),
                                 fieldWithPath("body.majors").description("user's majors"),
-                                fieldWithPath("body.postNum").description("how many times user write posts"),
-                                fieldWithPath("body.commentNum").description("how many times user write comments"),
-                                fieldWithPath("body.likeNum").description("how many times user like posts"),
                                 fieldWithPath("_links.self.href").description("link to self")
                         )
                 ));
@@ -200,7 +140,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .build();
 
         //when
-        MockHttpServletRequestBuilder builder = post("/auth/sendotp")
+        MockHttpServletRequestBuilder builder = post("/auth/otp")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -247,7 +187,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .userId(userId)
                 .build();
         //when
-        MockHttpServletRequestBuilder builder = post("/auth/checkid")
+        MockHttpServletRequestBuilder builder = get("/auth/check/user-id")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -295,7 +235,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .nickname(nickname)
                 .build();
         //when
-        MockHttpServletRequestBuilder builder = post("/auth/checknickname")
+        MockHttpServletRequestBuilder builder = get("/auth/check/nickname")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -343,7 +283,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .schoolEmail(email)
                 .build();
         //when
-        MockHttpServletRequestBuilder builder = post("/auth/checkemail")
+        MockHttpServletRequestBuilder builder = get("/auth/check/email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -392,7 +332,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .build();
 
         //when
-        MockHttpServletRequestBuilder builder = post("/auth/checkotp")
+        MockHttpServletRequestBuilder builder = get("/auth/check/otp")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -590,7 +530,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .schoolEmail(schoolEmail)
                 .build();
         //when
-        MockHttpServletRequestBuilder builder = post("/auth/findid")
+        MockHttpServletRequestBuilder builder = get("/auth/user-id")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -640,7 +580,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .build();
 
         //when
-        MockHttpServletRequestBuilder builder = post("/auth/findpw")
+        MockHttpServletRequestBuilder builder = patch("/auth/password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));

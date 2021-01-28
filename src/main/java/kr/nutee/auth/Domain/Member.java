@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 @Builder
 @NoArgsConstructor
-
 @AllArgsConstructor
 public class Member {
 
@@ -38,10 +37,12 @@ public class Member {
 
     private LocalDateTime accessedAt;
 
-    private String imageUrl;
+    private String profileUrl;
 
+    @Builder.Default
     private List<String> interests = new ArrayList<>();
 
+    @Builder.Default
     private List<String> majors = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

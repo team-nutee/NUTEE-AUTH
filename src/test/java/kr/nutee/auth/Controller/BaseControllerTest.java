@@ -1,5 +1,7 @@
 package kr.nutee.auth.Controller;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.nutee.auth.Common.RestDocsConfiguration;
 import org.junit.jupiter.api.Disabled;
@@ -12,9 +14,11 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -35,5 +39,8 @@ public class BaseControllerTest {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    MongoTemplate mongoTemplate;
 
 }

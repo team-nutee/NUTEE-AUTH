@@ -1,5 +1,7 @@
 package kr.nutee.auth.DTO.Response;
 
+import kr.nutee.auth.Domain.Member;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +11,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class UserData implements Serializable {
 
@@ -16,27 +19,18 @@ public class UserData implements Serializable {
 
     private String nickname;
 
-    private ImageResponse image;
+    private String profileUrl;
 
     private List<String> interests;
 
     private List<String> majors;
 
-    private int postNum;
 
-    private int commentNum;
-
-    private int likeNum;
-
-
-    public UserData(Long id, String nickname, ImageResponse image, List<String> interests, List<String> majors, int postNum, int commentNum, int likeNum) {
-        this.id = id;
-        this.nickname = nickname;
-        this.image = image;
-        this.interests = interests;
-        this.majors = majors;
-        this.postNum = postNum;
-        this.commentNum = commentNum;
-        this.likeNum = likeNum;
+    public UserData(Member member) {
+        this.id = member.getId();
+        this.nickname = member.getNickname();
+        this.profileUrl = member.getProfileUrl();
+        this.interests = member.getInterests();
+        this.majors = member.getMajors();
     }
 }

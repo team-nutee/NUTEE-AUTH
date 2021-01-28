@@ -52,7 +52,7 @@ public class AuthController {
     /*
         내용 : 회원가입
     */
-    @PostMapping(path = "/signup")
+    @PostMapping(path = "/member")
     public ResponseEntity<ResponseResource> signUp(@RequestBody @Valid SignupDTO signupDTO) {
         UserData body = authService.signUp(signupDTO);
         Response response = Response.builder()
@@ -71,7 +71,7 @@ public class AuthController {
     /*
         내용 : 작성한 이메일로 NUTEE 인증 번호를 보낸다.
     */
-    @PostMapping(path = "/sendotp")
+    @PostMapping(path = "/otp")
     public ResponseEntity<ResponseResource> sendOtp(@RequestBody @Valid SendOTP sendOTP) {
         authService.sendOtp(sendOTP.getSchoolEmail(), setOtpNumber(sendOTP));
         Response response = Response.builder()
@@ -88,8 +88,8 @@ public class AuthController {
     /*
         내용 : 회원가입에 필요한 아이디 중복 체크
     */
-    @PostMapping(path = "/checkid")
-    public ResponseEntity<ResponseResource> idCheck(@RequestBody @Valid CheckIdDTO requestBody) {
+    @GetMapping(path = "/check/user-id")
+    public ResponseEntity<ResponseResource> checkUserId(@RequestBody @Valid CheckIdDTO requestBody) {
         if (!memberService.checkUserId(requestBody.getUserId())) {
             throw new ConflictException("아이디가 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
         }
@@ -108,7 +108,7 @@ public class AuthController {
     /*
         내용 : 회원가입에 필요한 닉네임 중복 체크
     */
-    @PostMapping(path = "/checknickname")
+    @GetMapping(path = "/check/nickname")
     public ResponseEntity<ResponseResource> nicknameCheck(@RequestBody @Valid CheckNicknameDTO checkNicknameDTO) {
         if (!memberService.checkNickname(checkNicknameDTO.getNickname())) {
             throw new ConflictException("닉네임이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
@@ -128,7 +128,7 @@ public class AuthController {
     /*
         내용 : 회원가입에 필요한 이메일 중복 체크
     */
-    @PostMapping(path = "/checkemail")
+    @GetMapping(path = "/check/email")
     public ResponseEntity<ResponseResource> emailCheck(@RequestBody @Valid CheckEmailDTO checkEmailDTO) {
         if (!memberService.checkEmail(checkEmailDTO.getSchoolEmail())) {
             throw new ConflictException("이메일이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
@@ -148,7 +148,7 @@ public class AuthController {
     /*
         내용 : 회원가입에 필요한 인증 넘버 체크
     */
-    @PostMapping(path = "/checkotp")
+    @GetMapping(path = "/check/otp")
     public ResponseEntity<ResponseResource> checkOtp(@RequestBody @Valid CheckOtpDTO checkOtpDTO) {
         if (!authService.checkOtp(checkOtpDTO.getOtp())) {
             throw new NotExistException("otp 인증에 실패하였습니다.", ErrorCode.NOT_EXIST, HttpStatus.UNAUTHORIZED);
@@ -278,7 +278,7 @@ public class AuthController {
     /*
         내용 : 아이디 찾기
     */
-    @PostMapping(path = "/findid")
+    @GetMapping(path = "/user-id")
     public ResponseEntity<Object> findId(@RequestBody FindIdRequest body) {
         String userId = authService.findId(body.getSchoolEmail()).getUserId();
 
@@ -294,10 +294,10 @@ public class AuthController {
     }
 
     /*
-        내용 : 비밀번호 찾기
+        내용 : 비밀번호 변경
     */
-    @PostMapping(path = "/findpw")
-    public ResponseEntity<ResponseResource> findPassword(@RequestBody FindPassWordRequest body) {
+    @PatchMapping(path = "/password")
+    public ResponseEntity<ResponseResource> changePassword(@RequestBody FindPassWordRequest body) {
         authService.findPassword(body.getSchoolEmail(),body.getUserId());
 
         Response response = Response.builder()
