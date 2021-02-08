@@ -124,7 +124,6 @@ public class AuthService {
         Otp otp = Otp.builder()
                 .otpNumber(otpNumber)
                 .build();
-
         otpRepository.save(otp);
     }
 

@@ -197,7 +197,6 @@ class MemberControllerTest extends BaseControllerTest {
                     fieldWithPath("_links.self.href").description("link to self")
                 )
             ));
-
     }
 
     @Test
@@ -239,7 +238,6 @@ class MemberControllerTest extends BaseControllerTest {
                     fieldWithPath("_links.self.href").description("link to self")
                 )
             ));
-
     }
 
     @Test
@@ -279,7 +277,6 @@ class MemberControllerTest extends BaseControllerTest {
                     fieldWithPath("_links.self.href").description("link to self")
                 )
             ));
-
     }
 
     @Test
@@ -323,7 +320,6 @@ class MemberControllerTest extends BaseControllerTest {
                     fieldWithPath("_links.self.href").description("link to self")
                 )
             ));
-
     }
 
     @Test
@@ -367,6 +363,5 @@ class MemberControllerTest extends BaseControllerTest {
                     fieldWithPath("_links.self.href").description("link to self")
                 )
             ));
-
     }
 }
