@@ -29,6 +29,9 @@ public class MemberService {
 
     private final KafkaSenderTemplate kafkaSenderTemplate;
 
+
+
+
     @Value("${jwt.secret}")
     String secretKey;
 
