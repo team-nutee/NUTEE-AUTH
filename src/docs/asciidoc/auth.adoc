@@ -107,10 +107,10 @@ NUTEE REST API에서 사용하는 NUTEE 상태 코드입니다.
 
 
 [[api]]
-== API
+== API(AUTH)
 
 [[resources-auth]]
-== AUTH
+== 인증
 
 auth는 인증에 관한 내용이다.
 
@@ -253,7 +253,7 @@ include::{snippets}/logout/http-response.adoc[]
 
 
 [[resources-user]]
-== 유저 데이터
+== 유저
 
 서비스를 사용하는 유저의 데이터를 의미한다.
 
