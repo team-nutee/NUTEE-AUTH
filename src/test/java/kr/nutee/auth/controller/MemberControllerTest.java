@@ -99,22 +99,7 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("body").exists())
             .andExpect(MEMBER_EXPECT)
             .andExpect(jsonPath("_links.self").exists())
-            .andDo(document("get-me",
-                links(
-                    linkWithRel("self").description("link to self")
-                ),
-                responseFields(
-                    fieldWithPath("code").description("label code number"),
-                    fieldWithPath("message").description("message"),
-                    fieldWithPath("body").description("body of the response"),
-                    fieldWithPath("body.id").description("user's id"),
-                    fieldWithPath("body.nickname").description("user's nickname"),
-                    fieldWithPath("body.profileUrl").description("user's profile image"),
-                    fieldWithPath("body.interests").description("user's interests"),
-                    fieldWithPath("body.majors").description("user's majors"),
-                    fieldWithPath("_links.self.href").description("link to self")
-                )
-            ));
+            .andDo(document("get-me"));
     }
 
     @Test
@@ -140,22 +125,7 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("body").exists())
             .andExpect(MEMBER_EXPECT)
             .andExpect(jsonPath("_links.self").exists())
-            .andDo(document("get-user",
-                links(
-                    linkWithRel("self").description("link to self")
-                ),
-                responseFields(
-                    fieldWithPath("code").description("label code number"),
-                    fieldWithPath("message").description("message"),
-                    fieldWithPath("body").description("body of the response"),
-                    fieldWithPath("body.id").description("user's id"),
-                    fieldWithPath("body.nickname").description("user's nickname"),
-                    fieldWithPath("body.profileUrl").description("user's profile image"),
-                    fieldWithPath("body.interests").description("user's interests"),
-                    fieldWithPath("body.majors").description("user's majors"),
-                    fieldWithPath("_links.self.href").description("link to self")
-                )
-            ));
+            .andDo(document("get-user"));
     }
 
     @Test
@@ -183,20 +153,7 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("code").exists())
             .andExpect(jsonPath("message").exists())
             .andExpect(jsonPath("body").isEmpty())
-            .andDo(document("change-password",
-                links(
-                    linkWithRel("self").description("link to self")
-                ),
-                requestFields(
-                    fieldWithPath("password").description("new password you want")
-                ),
-                responseFields(
-                    fieldWithPath("code").description("label code number"),
-                    fieldWithPath("message").description("message"),
-                    fieldWithPath("body").description("body of the response"),
-                    fieldWithPath("_links.self.href").description("link to self")
-                )
-            ));
+            .andDo(document("change-password"));
     }
 
     @Test
@@ -224,20 +181,7 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("code").exists())
             .andExpect(jsonPath("message").exists())
             .andExpect(jsonPath("body").value("바보바보"))
-            .andDo(document("change-nickname",
-                links(
-                    linkWithRel("self").description("link to self")
-                ),
-                requestFields(
-                    fieldWithPath("nickname").description("new nickname you want")
-                ),
-                responseFields(
-                    fieldWithPath("code").description("label code number"),
-                    fieldWithPath("message").description("message"),
-                    fieldWithPath("body").description("nickname that change success"),
-                    fieldWithPath("_links.self.href").description("link to self")
-                )
-            ));
+            .andDo(document("change-nickname"));
     }
 
     @Test
@@ -263,20 +207,7 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("code").exists())
             .andExpect(jsonPath("message").exists())
             .andExpect(jsonPath("body").value("newProfileUrl.jpg"))
-            .andDo(document("change-profile",
-                links(
-                    linkWithRel("self").description("link to self")
-                ),
-                requestFields(
-                    fieldWithPath("profileUrl").description("new profile image url that you want")
-                ),
-                responseFields(
-                    fieldWithPath("code").description("label code number"),
-                    fieldWithPath("message").description("message"),
-                    fieldWithPath("body").description("response of your new profile imageUrl"),
-                    fieldWithPath("_links.self.href").description("link to self")
-                )
-            ));
+            .andDo(document("change-profile"));
     }
 
     @Test
@@ -306,20 +237,7 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("body").exists())
             .andExpect(jsonPath("body[0]").value("INTER3"))
             .andExpect(jsonPath("body[1]").value("INTER4"))
-            .andDo(document("change-interests",
-                links(
-                    linkWithRel("self").description("link to self")
-                ),
-                requestFields(
-                    fieldWithPath("interests").description("new interest list you want")
-                ),
-                responseFields(
-                    fieldWithPath("code").description("label code number"),
-                    fieldWithPath("message").description("message"),
-                    fieldWithPath("body").description("body of the response"),
-                    fieldWithPath("_links.self.href").description("link to self")
-                )
-            ));
+            .andDo(document("change-interests"));
     }
 
     @Test
@@ -349,19 +267,6 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("body").exists())
             .andExpect(jsonPath("body[0]").value("MAJOR3"))
             .andExpect(jsonPath("body[1]").value("MAJOR4"))
-            .andDo(document("change-majors",
-                links(
-                    linkWithRel("self").description("link to self")
-                ),
-                requestFields(
-                    fieldWithPath("majors").description("new major list you want")
-                ),
-                responseFields(
-                    fieldWithPath("code").description("label code number"),
-                    fieldWithPath("message").description("message"),
-                    fieldWithPath("body").description("body of the response"),
-                    fieldWithPath("_links.self.href").description("link to self")
-                )
-            ));
+            .andDo(document("change-majors"));
     }
 }
