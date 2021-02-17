@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,10 +43,7 @@ public class AuthController {
     private final MemberService memberService;
     private final AuthService authService;
     private final StringRedisTemplate stringRedisTemplate;
-    private final JwtUserDetailsService userDetailsService;
     private final JwtGenerator jwtGenerator;
-    private final AuthenticationManager authenticationManager;
-    private final MemberRepository memberRepository;
 
     /*
         내용 : 회원가입
@@ -168,22 +166,7 @@ public class AuthController {
     */
     @PostMapping(path = "/login")
     public ResponseEntity<ResponseResource> login(@RequestBody @Valid LoginDTO loginDTO) {
-        final String userId = loginDTO.getUserId();
-        //로그인
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userId, loginDTO.getPassword()));
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-        final String accessToken = jwtGenerator.generateAccessToken(userDetails);
-        final String refreshToken = jwtGenerator.generateRefreshToken(userId);
-
-        //refreshToken -> redis
-        stringRedisTemplate.opsForValue().set("refresh-" + userId, refreshToken);
-
-        LoginResponse body = LoginResponse.builder()
-                .memberId(memberRepository.findMemberByUserId(userId).getId())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-
+        LoginResponse body = authService.login(loginDTO);
         Response response = Response.builder()
                 .code(10)
                 .message("SUCCESS")
@@ -201,38 +184,7 @@ public class AuthController {
     */
     @PostMapping(path = "/refresh")
     public ResponseEntity<ResponseResource> requestForNewAccessToken(@RequestBody RefreshRequest token) {
-        String username;
-
-        String expiredAccessToken = token.getAccessToken();
-        String refreshToken = token.getRefreshToken();
-
-        try {
-            username = jwtGenerator.getUserIdFromToken(expiredAccessToken);
-        } catch (ExpiredJwtException e) {
-            username = e.getClaims().getSubject();
-            log.info("username from expired access token: " + username);
-        }
-        if (username == null) throw new IllegalArgumentException();
-
-        String refreshTokenFromRedis = stringRedisTemplate.opsForValue().get("refresh-" + username);
-        log.info("refreshTokenFromRedis: " + refreshTokenFromRedis);
-
-        //유저가 가진 refreshToken과 Redis에 저장된 refreshToken이 일치하는지 확인
-        // Todo : 캐싱을 어떻게 할 지 방법을 찾지 못해 주석처리 해두었음. 테스트 해야함.
-//        if (!refreshToken.equals(refreshTokenFromRedis)) {
-//            throw new IllegalArgumentException("refreshToken error");
-//        }
-
-        //유저가 가진 refreshToken이 6개월 기간만료된 토큰인지 확인
-        if (jwtGenerator.isTokenExpired(refreshToken)) {
-            throw new IllegalArgumentException("refreshToken expired");
-        }
-
-        //모든 조건 충족 되었을 시 새로운 토큰 발행
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        RefreshResponse body = RefreshResponse.builder()
-                .accessToken(jwtGenerator.generateAccessToken(userDetails))
-                .build();
+        RefreshResponse body = authService.refresh(token);
 
         Response response = Response.builder()
                 .code(10)

@@ -4,14 +4,20 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.util.List;
 import kr.nutee.auth.domain.Member;
+import kr.nutee.auth.dto.request.ChangePasswordRequest;
+import kr.nutee.auth.dto.request.LoginDTO;
 import kr.nutee.auth.enums.ErrorCode;
 import kr.nutee.auth.enums.RoleType;
 import kr.nutee.auth.exception.NotAllowedException;
 import kr.nutee.auth.repository.MemberRepository;
 import kr.nutee.auth.util.KafkaSenderTemplate;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +30,9 @@ import java.util.Base64;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-
     private final PasswordEncoder bcryptEncoder;
-
     private final KafkaSenderTemplate kafkaSenderTemplate;
-
-
-
+    private final AuthenticationManager authenticationManager;
 
     @Value("${jwt.secret}")
     String secretKey;
@@ -91,14 +93,24 @@ public class MemberService {
         return updatedMember.getProfileUrl();
     }
 
-    public void changePassword(Long memberId, Long requestId, String password) {
-        if (!memberId.equals(requestId)) {
-            throw new NotAllowedException("회원정보 불일치", ErrorCode.CONFLICT, HttpStatus.FORBIDDEN);
-        }
+    public void changePassword(Long memberId, ChangePasswordRequest request) {
         Member member = memberRepository.findMemberById(memberId);
-        password = bcryptEncoder.encode(password);
-        member.setPassword(password);
+        LoginDTO loginDTO = LoginDTO.builder()
+            .userId(member.getUserId())
+            .password(request.getNowPassword())
+            .build();
+        if (!authenticate(loginDTO)) {
+            throw new NotAllowedException("현재 비밀번호가 일치하지 않습니다.",ErrorCode.ACCEPT_DENIED,HttpStatus.UNAUTHORIZED);
+        }
+        String changePassword = bcryptEncoder.encode(request.getChangePassword());
+        member.setPassword(changePassword);
         memberRepository.save(member);
+    }
+
+    private boolean authenticate(LoginDTO request) {
+        return authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getUserId(), request.getPassword()))
+            .isAuthenticated();
     }
 
     public Boolean checkUserId(String userId){

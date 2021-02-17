@@ -85,14 +85,13 @@ public class MemberController {
     /*
         유저 비밀번호 변경
      */
-    @PatchMapping("/{memberId}/password")
+    @PatchMapping("/password")
     public ResponseEntity<ResponseResource> changePassword(
         @RequestBody ChangePasswordRequest body,
-        HttpServletRequest request,
-        @PathVariable String memberId
+        HttpServletRequest request
     ) {
         Member user = memberService.getUserBy(request);
-        memberService.changePassword(user.getId(), Long.parseLong(memberId), body.getPassword());
+        memberService.changePassword(user.getId(),body);
         Response response = Response.builder()
             .code(10)
             .message("SUCCESS")
