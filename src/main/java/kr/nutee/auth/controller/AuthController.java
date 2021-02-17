@@ -84,7 +84,7 @@ public class AuthController {
     /*
         내용 : 회원가입에 필요한 아이디 중복 체크
     */
-    @GetMapping(path = "/check/user-id")
+    @PostMapping(path = "/check/user-id")
     public ResponseEntity<ResponseResource> checkUserId(@RequestBody @Valid CheckIdDTO requestBody) {
         if (!memberService.checkUserId(requestBody.getUserId())) {
             throw new ConflictException("아이디가 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
@@ -104,7 +104,7 @@ public class AuthController {
     /*
         내용 : 회원가입에 필요한 닉네임 중복 체크
     */
-    @GetMapping(path = "/check/nickname")
+    @PostMapping(path = "/check/nickname")
     public ResponseEntity<ResponseResource> nicknameCheck(@RequestBody @Valid CheckNicknameDTO checkNicknameDTO) {
         if (!memberService.checkNickname(checkNicknameDTO.getNickname())) {
             throw new ConflictException("닉네임이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
@@ -124,7 +124,7 @@ public class AuthController {
     /*
         내용 : 회원가입에 필요한 이메일 중복 체크
     */
-    @GetMapping(path = "/check/email")
+    @PostMapping(path = "/check/email")
     public ResponseEntity<ResponseResource> emailCheck(@RequestBody @Valid CheckEmailDTO checkEmailDTO) {
         if (!memberService.checkEmail(checkEmailDTO.getSchoolEmail())) {
             throw new ConflictException("이메일이 중복되었습니다.", ErrorCode.CONFLICT, HttpStatus.CONFLICT);
@@ -144,7 +144,7 @@ public class AuthController {
     /*
         내용 : 회원가입에 필요한 인증 넘버 체크
     */
-    @GetMapping(path = "/check/otp")
+    @PostMapping(path = "/check/otp")
     public ResponseEntity<ResponseResource> checkOtp(@RequestBody @Valid CheckOtpDTO checkOtpDTO) {
         if (!authService.checkOtp(checkOtpDTO.getOtp())) {
             throw new NotExistException("otp 인증에 실패하였습니다.", ErrorCode.NOT_EXIST, HttpStatus.UNAUTHORIZED);

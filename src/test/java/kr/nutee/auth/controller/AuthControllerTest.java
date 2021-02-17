@@ -171,7 +171,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .userId(userId)
                 .build();
         //when
-        MockHttpServletRequestBuilder builder = get("/auth/check/user-id")
+        MockHttpServletRequestBuilder builder = post("/auth/check/user-id")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -212,7 +212,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .nickname(nickname)
                 .build();
         //when
-        MockHttpServletRequestBuilder builder = get("/auth/check/nickname")
+        MockHttpServletRequestBuilder builder = post("/auth/check/nickname")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -253,7 +253,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .schoolEmail(email)
                 .build();
         //when
-        MockHttpServletRequestBuilder builder = get("/auth/check/email")
+        MockHttpServletRequestBuilder builder = post("/auth/check/email")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));
@@ -295,7 +295,7 @@ class AuthControllerTest extends BaseControllerTest {
                 .build();
 
         //when
-        MockHttpServletRequestBuilder builder = get("/auth/check/otp")
+        MockHttpServletRequestBuilder builder = post("/auth/check/otp")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(body));

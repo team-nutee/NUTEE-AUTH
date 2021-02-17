@@ -144,6 +144,21 @@ include::{snippets}/send-otp/http-response.adoc[]
 
 
 
+[[resources-check-otp]]
+=== OTP 체크
+
+`POST` 요청을 사용하여 회원 인증에 필요한 OTP를 메일로 전송한다.
+
+[[http-request]]
+==== http-request
+include::{snippets}/check-otp/http-request.adoc[]
+
+[[http-response]]
+==== http-response
+include::{snippets}/check-otp/http-response.adoc[]
+
+
+
 [[resources-check-id]]
 === ID 중복 체크
 
