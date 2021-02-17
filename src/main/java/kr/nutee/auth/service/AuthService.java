@@ -1,17 +1,29 @@
 package kr.nutee.auth.service;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import kr.nutee.auth.dto.request.LoginDTO;
+import kr.nutee.auth.dto.request.RefreshRequest;
 import kr.nutee.auth.dto.request.SignupDTO;
+import kr.nutee.auth.dto.response.LoginResponse;
+import kr.nutee.auth.dto.response.RefreshResponse;
 import kr.nutee.auth.dto.response.UserData;
 import kr.nutee.auth.domain.*;
 import kr.nutee.auth.enums.ErrorCode;
 import kr.nutee.auth.exception.ConflictException;
+import kr.nutee.auth.jwt.JwtGenerator;
 import kr.nutee.auth.repository.MemberRepository;
 import kr.nutee.auth.repository.OtpRepository;
 import kr.nutee.auth.util.KafkaSenderTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +44,10 @@ public class AuthService {
     private final PasswordEncoder bcryptEncoder;
     private final MemberService memberService;
     private final KafkaSenderTemplate kafkaSenderTemplate;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUserDetailsService userDetailsService;
+    private final JwtGenerator jwtGenerator;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Value("${mail.id}")
     private String mailId;
@@ -71,6 +87,58 @@ public class AuthService {
 
     public Member findId(String schoolEmail){
         return memberRepository.findMemberBySchoolEmail(schoolEmail);
+    }
+
+    public LoginResponse login(LoginDTO request) {
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getUserId(), request.getPassword()));
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUserId());
+        final String accessToken = jwtGenerator.generateAccessToken(userDetails);
+        final String refreshToken = jwtGenerator.generateRefreshToken(request.getUserId());
+
+        //refreshToken -> redis
+        stringRedisTemplate.opsForValue().set("refresh-" + request.getUserId(), refreshToken);
+
+        return LoginResponse.builder()
+            .memberId(memberRepository.findMemberByUserId(request.getUserId()).getId())
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .build();
+    }
+
+    public RefreshResponse refresh(RefreshRequest token) {
+        String username;
+
+        String expiredAccessToken = token.getAccessToken();
+        String refreshToken = token.getRefreshToken();
+
+        try {
+            username = jwtGenerator.getUserIdFromToken(expiredAccessToken);
+        } catch (ExpiredJwtException e) {
+            username = e.getClaims().getSubject();
+            log.info("username from expired access token: " + username);
+        }
+        if (username == null) throw new IllegalArgumentException();
+
+        String refreshTokenFromRedis = stringRedisTemplate.opsForValue().get("refresh-" + username);
+        log.info("refreshTokenFromRedis: " + refreshTokenFromRedis);
+
+        //유저가 가진 refreshToken과 Redis에 저장된 refreshToken이 일치하는지 확인
+        // Todo : 캐싱을 어떻게 할 지 방법을 찾지 못해 주석처리 해두었음. 테스트 해야함.
+//        if (!refreshToken.equals(refreshTokenFromRedis)) {
+//            throw new IllegalArgumentException("refreshToken error");
+//        }
+
+        //유저가 가진 refreshToken이 6개월 기간만료된 토큰인지 확인
+        if (jwtGenerator.isTokenExpired(refreshToken)) {
+            throw new IllegalArgumentException("refreshToken expired");
+        }
+
+        //모든 조건 충족 되었을 시 새로운 토큰 발행
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return RefreshResponse.builder()
+            .accessToken(jwtGenerator.generateAccessToken(userDetails))
+            .build();
     }
 
     @Transactional

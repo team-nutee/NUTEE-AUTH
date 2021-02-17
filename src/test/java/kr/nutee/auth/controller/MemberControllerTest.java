@@ -17,15 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
-import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -40,6 +39,9 @@ class MemberControllerTest extends BaseControllerTest {
 
     @Autowired
     AuthService authService;
+
+    @Autowired
+    AuthenticationManager authenticationManager;
 
     final ResultMatcher MEMBER_EXPECT = ResultMatcher.matchAll(
         jsonPath("body.id").exists(),
@@ -132,13 +134,16 @@ class MemberControllerTest extends BaseControllerTest {
     @DisplayName("비밀번호 변경 성공")
     void changeMemberPassword() throws Exception {
         //given
-        String password = "P@ssw0rd";
+        String userId = "mf0001";
+        String nowPassword = "P@ssw0rd";
+        String changePassword = "P@ssw0rd2";
         ChangePasswordRequest body = ChangePasswordRequest.builder()
-            .password(password)
+            .nowPassword(nowPassword)
+            .changePassword(changePassword)
             .build();
 
         //when
-        MockHttpServletRequestBuilder builder = patch("/auth/user/1/password")
+        MockHttpServletRequestBuilder builder = patch("/auth/user/password")
             .contentType(MediaType.APPLICATION_JSON)
             .header("Authorization", "Bearer " + token)
             .accept(MediaTypes.HAL_JSON_VALUE)
@@ -154,6 +159,10 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("message").exists())
             .andExpect(jsonPath("body").isEmpty())
             .andDo(document("change-password"));
+
+        Authentication authenticate = authenticationManager
+            .authenticate(new UsernamePasswordAuthenticationToken(userId, changePassword));
+        assertTrue(authenticate.isAuthenticated());
     }
 
     @Test
