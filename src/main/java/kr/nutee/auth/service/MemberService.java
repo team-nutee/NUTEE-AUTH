@@ -70,26 +70,34 @@ public class MemberService {
     }
 
     public String changeNickname(Member member, String nickname) {
-        member.setNickname(nickname);
-        Member updatedMember = memberRepository.save(member);
+        Member target = memberRepository.findMemberById(member.getId());
+        target.setNickname(nickname);
+        Member updatedMember = memberRepository.save(target);
+        kafkaSenderTemplate.sendUpdateMember(member,target);
         return updatedMember.getNickname();
     }
 
     public List<String> changeInterests(Member member, List<String> interests) {
-        member.setInterests(interests);
-        Member updatedMember = memberRepository.save(member);
+        Member target = memberRepository.findMemberById(member.getId());
+        target.setInterests(interests);
+        Member updatedMember = memberRepository.save(target);
+        kafkaSenderTemplate.sendUpdateMember(member,target);
         return updatedMember.getInterests();
     }
 
     public List<String> changeMajors(Member member, List<String> majors) {
-        member.setMajors(majors);
-        Member updatedMember = memberRepository.save(member);
+        Member target = memberRepository.findMemberById(member.getId());
+        target.setMajors(majors);
+        Member updatedMember = memberRepository.save(target);
+        kafkaSenderTemplate.sendUpdateMember(member,target);
         return updatedMember.getMajors();
     }
 
     public String changeProfile(Member member, String profileUrl) {
-        member.setProfileUrl(profileUrl);
-        Member updatedMember = memberRepository.save(member);
+        Member target = memberRepository.findMemberById(member.getId());
+        target.setProfileUrl(profileUrl);
+        Member updatedMember = memberRepository.save(target);
+        kafkaSenderTemplate.sendUpdateMember(member,target);
         return updatedMember.getProfileUrl();
     }
 
