@@ -55,6 +55,10 @@ class MemberControllerTest extends BaseControllerTest {
 
     @BeforeEach
     void setMember() {
+        mongoTemplate.dropCollection("members");
+        mongoTemplate.dropCollection("otps");
+        mongoTemplate.dropCollection("database_sequences");
+
         List<String> interests = List.of("INTER1", "INTER2");
 
         List<String> majors = List.of("MAJOR1", "MAJOR2");
@@ -70,13 +74,6 @@ class MemberControllerTest extends BaseControllerTest {
             .build();
 
         authService.signUp(body);
-    }
-
-    @AfterEach
-    void dropCollection() {
-        mongoTemplate.dropCollection("members");
-        mongoTemplate.dropCollection("otps");
-        mongoTemplate.dropCollection("database_sequences");
     }
 
     @Test
