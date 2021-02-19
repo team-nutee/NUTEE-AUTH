@@ -49,6 +49,8 @@ public class AuthService {
     private final JwtGenerator jwtGenerator;
     private final StringRedisTemplate stringRedisTemplate;
 
+    private final int NICKNAME_LENGTH_LIMIT = 12;
+
     @Value("${mail.id}")
     private String mailId;
 
@@ -233,6 +235,9 @@ public class AuthService {
         }
         if(!checkOtp(signupDTO.getOtp())){
             throw new ConflictException("교내 이메일 인증에 실패 하였습니다."+signupDTO.getOtp(), ErrorCode.CONFLICT, HttpStatus.UNAUTHORIZED);
+        }
+        if (signupDTO.getNickname().length()>NICKNAME_LENGTH_LIMIT) {
+            throw new IllegalArgumentException("12자를 초과하는 닉네임을 사용할 수 없습니다.");
         }
 
         String password = bcryptEncoder.encode(signupDTO.getPassword());
