@@ -17,37 +17,39 @@ public class KafkaSenderTemplate {
 
     public void sendCreateMember(Member origin, Member change) {
         MemberMessage message = new MemberMessage("CREATE", origin, change);
-        ListenableFuture<SendResult<String, MemberMessage>> future = memberKafkaTemplate
-            .send("member-sns", message);
+        memberKafkaTemplate.send("member-sns", message);
 
-        future.addCallback(new ListenableFutureCallback<>() {
-            @Override
-            public void onFailure(Throwable ex) {
-
-            }
-
-            @Override
-            public void onSuccess(SendResult<String, MemberMessage> result) {
-
-            }
-        });
+//        ListenableFuture<SendResult<String, MemberMessage>> future = memberKafkaTemplate
+//            .send("member-sns", message);
+//        future.addCallback(new ListenableFutureCallback<>() {
+//            @Override
+//            public void onFailure(Throwable ex) {
+//
+//            }
+//
+//            @Override
+//            public void onSuccess(SendResult<String, MemberMessage> result) {
+//
+//            }
+//        });
     }
 
     public void sendUpdateMember(Member origin, Member change) {
         MemberMessage message = new MemberMessage("UPDATE", origin, change);
-        ListenableFuture<SendResult<String, MemberMessage>> future = memberKafkaTemplate
-            .send("member-sns", message);
-        future.addCallback(new ListenableFutureCallback<>() {
-            @Override
-            public void onFailure(Throwable ex) {
-
-            }
-
-            @Override
-            public void onSuccess(SendResult<String, MemberMessage> result) {
-
-            }
-        });
+        memberKafkaTemplate.send("member-sns", message);
+//        ListenableFuture<SendResult<String, MemberMessage>> future = memberKafkaTemplate
+//            .send("member-sns", message);
+//        future.addCallback(new ListenableFutureCallback<>() {
+//            @Override
+//            public void onFailure(Throwable ex) {
+//
+//            }
+//
+//            @Override
+//            public void onSuccess(SendResult<String, MemberMessage> result) {
+//
+//            }
+//        });
     }
 
 }

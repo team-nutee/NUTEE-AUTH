@@ -57,8 +57,7 @@ public class MemberService {
 
     public void updateUser(Member member) {
         Member target = memberRepository.findMemberById(member.getId());
-        target = memberRepository.save(target);
-        kafkaSenderTemplate.sendUpdateMember(member,target);
+        memberRepository.save(target);
     }
 
     public Member getUserBy(HttpServletRequest request){
