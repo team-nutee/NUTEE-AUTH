@@ -12,6 +12,7 @@ import kr.nutee.auth.service.AuthService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
@@ -77,6 +78,7 @@ class MemberControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @Order(1)
     @DisplayName("내 데이터 호출 성공")
     void getMyUserData() throws Exception {
         //given
@@ -102,6 +104,7 @@ class MemberControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @Order(2)
     @DisplayName("유저 데이터 호출 성공")
     void getUserData() throws Exception {
         //given
@@ -128,6 +131,7 @@ class MemberControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @Order(3)
     @DisplayName("비밀번호 변경 성공")
     void changeMemberPassword() throws Exception {
         //given
@@ -163,6 +167,7 @@ class MemberControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @Order(4)
     @DisplayName("닉네임 변경 성공")
     void changeNickname() throws Exception {
         //given
@@ -191,6 +196,7 @@ class MemberControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @Order(5)
     @DisplayName("멤버 프로필 이미지 변경 성공")
     void changeMemberProfile() throws Exception {
         //given
@@ -217,6 +223,7 @@ class MemberControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @Order(6)
     @DisplayName("흥미 변경 성공")
     void changeMemberInterests() throws Exception {
         //given
@@ -247,6 +254,7 @@ class MemberControllerTest extends BaseControllerTest {
     }
 
     @Test
+    @Order(7)
     @DisplayName("전공 변경 성공")
     void changeMemberMajors() throws Exception {
         //given
