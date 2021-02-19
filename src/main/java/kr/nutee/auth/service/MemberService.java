@@ -34,6 +34,8 @@ public class MemberService {
     private final KafkaSenderTemplate kafkaSenderTemplate;
     private final AuthenticationManager authenticationManager;
 
+    private final int NICKNAME_LENGTH_LIMIT = 12;
+
     @Value("${jwt.secret}")
     String secretKey;
 
@@ -69,6 +71,9 @@ public class MemberService {
     }
 
     public String changeNickname(Member member, String nickname) {
+        if (nickname.length()>NICKNAME_LENGTH_LIMIT) {
+            throw new IllegalArgumentException("12자를 초과하는 닉네임을 사용할 수 없습니다.");
+        }
         Member target = memberRepository.findMemberById(member.getId());
         target.setNickname(nickname);
         Member updatedMember = memberRepository.save(target);

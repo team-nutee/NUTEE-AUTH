@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -80,15 +81,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(map, HttpStatus.CONFLICT);
     }
 
-//    @ExceptionHandler({
-//            IllegalArgumentException.class, MissingServletRequestParameterException.class})
-//    public ResponseEntity<Object> paramsEx(Exception e) {
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("code", 52);
-//        map.put("message","");
-//        log.warn("params ex: "+ e.getClass());
-//        return new ResponseEntity<>(map, HttpStatus.CONFLICT);
-//    }
+    @ExceptionHandler({
+            IllegalArgumentException.class, MissingServletRequestParameterException.class})
+    public ResponseEntity<Object> paramsEx(Exception e) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", 52);
+        map.put("message","");
+        log.warn("params ex: "+ e.getClass());
+        return new ResponseEntity<>(map, HttpStatus.CONFLICT);
+    }
 
 //    @ExceptionHandler(NullPointerException.class)
 //    public ResponseEntity<Object> nullEx(Exception e) {
