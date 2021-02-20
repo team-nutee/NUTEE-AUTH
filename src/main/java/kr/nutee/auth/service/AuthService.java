@@ -251,7 +251,7 @@ public class AuthService {
                 .build();
 
         member = memberService.createUser(member);
-
+        otpRepository.deleteOtpByOtpNumber(signupDTO.getOtp());
         kafkaSenderTemplate.sendCreateMember(member,member);
         return UserData.builder()
                 .id(member.getId())
@@ -265,11 +265,7 @@ public class AuthService {
         if (otp.equals("000000")) {
             return true;
         }
-        if (otpRepository.findOtpByOtpNumber(otp) == null) {
-            return false;
-        }
-        otpRepository.deleteOtpByOtpNumber(otp);
-        return true;
+        return otpRepository.findOtpByOtpNumber(otp) != null;
     }
 
 }
