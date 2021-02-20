@@ -29,10 +29,10 @@ class AuthControllerTest extends BaseControllerTest {
         jsonPath("body.id").exists(),
         jsonPath("body.nickname").value("moon2"),
         jsonPath("body.profileUrl").isEmpty(),
-        jsonPath("body.interests[0]").value("INTER1"),
-        jsonPath("body.interests[1]").value("INTER2"),
-        jsonPath("body.majors[0]").value("MAJOR1"),
-        jsonPath("body.majors[1]").value("MAJOR2")
+        jsonPath("body.interests[0]").value("FREE"),
+        jsonPath("body.interests[1]").value("FOOD"),
+        jsonPath("body.majors[0]").value("IT"),
+        jsonPath("body.majors[1]").value("ENGLISH")
     );
 
     @BeforeEach
@@ -41,8 +41,8 @@ class AuthControllerTest extends BaseControllerTest {
         mongoTemplate.dropCollection("otps");
         mongoTemplate.dropCollection("database_sequences");
 
-        List<String> interests = List.of("INTER1","INTER2");
-        List<String> majors = List.of("MAJOR1","MAJOR2");
+        List<String> interests = List.of("FREE","FOOD");
+        List<String> majors = List.of("IT","ENGLISH");
 
         SignupDTO body = SignupDTO.builder()
                 .userId("mf0001")
@@ -61,9 +61,9 @@ class AuthControllerTest extends BaseControllerTest {
     @DisplayName("회원가입")
     void signUp() throws Exception {
         //given
-        List<String> interests = List.of("INTER1","INTER2");
+        List<String> interests = List.of("FREE","FOOD");
 
-        List<String> majors = List.of("MAJOR1","MAJOR2");
+        List<String> majors = List.of("IT","ENGLISH");
 
         SignupDTO body = SignupDTO.builder()
                 .userId("mf0002")
