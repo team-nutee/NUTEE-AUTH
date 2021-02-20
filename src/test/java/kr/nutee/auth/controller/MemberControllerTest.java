@@ -48,10 +48,10 @@ class MemberControllerTest extends BaseControllerTest {
         jsonPath("body.id").exists(),
         jsonPath("body.nickname").value("moon1"),
         jsonPath("body.profileUrl").isEmpty(),
-        jsonPath("body.interests[0]").value("INTER1"),
-        jsonPath("body.interests[1]").value("INTER2"),
-        jsonPath("body.majors[0]").value("MAJOR1"),
-        jsonPath("body.majors[1]").value("MAJOR2")
+        jsonPath("body.interests[0]").value("FREE"),
+        jsonPath("body.interests[1]").value("FOOD"),
+        jsonPath("body.majors[0]").value("IT"),
+        jsonPath("body.majors[1]").value("ENGLISH")
     );
 
     @BeforeEach
@@ -60,9 +60,9 @@ class MemberControllerTest extends BaseControllerTest {
         mongoTemplate.dropCollection("otps");
         mongoTemplate.dropCollection("database_sequences");
 
-        List<String> interests = List.of("INTER1", "INTER2");
+        List<String> interests = List.of("FREE", "FOOD");
 
-        List<String> majors = List.of("MAJOR1", "MAJOR2");
+        List<String> majors = List.of("IT", "ENGLISH");
 
         SignupDTO body = SignupDTO.builder()
             .userId("mf0001")
@@ -227,7 +227,7 @@ class MemberControllerTest extends BaseControllerTest {
     @DisplayName("흥미 변경 성공")
     void changeMemberInterests() throws Exception {
         //given
-        List<String> interests = List.of("INTER3","INTER4");
+        List<String> interests = List.of("ANIMAL","STUDY");
         ChangeInterestsRequest body = ChangeInterestsRequest.builder()
             .interests(interests)
             .build();
@@ -248,8 +248,8 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("code").exists())
             .andExpect(jsonPath("message").exists())
             .andExpect(jsonPath("body").exists())
-            .andExpect(jsonPath("body[0]").value("INTER3"))
-            .andExpect(jsonPath("body[1]").value("INTER4"))
+            .andExpect(jsonPath("body[0]").value("ANIMAL"))
+            .andExpect(jsonPath("body[1]").value("STUDY"))
             .andDo(document("change-interests"));
     }
 
@@ -258,7 +258,7 @@ class MemberControllerTest extends BaseControllerTest {
     @DisplayName("전공 변경 성공")
     void changeMemberMajors() throws Exception {
         //given
-        List<String> majors = List.of("MAJOR3","MAJOR4");
+        List<String> majors = List.of("WELFARE","CHINESE");
         ChangeMajorsRequest body = ChangeMajorsRequest.builder()
             .majors(majors)
             .build();
@@ -279,8 +279,8 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("code").exists())
             .andExpect(jsonPath("message").exists())
             .andExpect(jsonPath("body").exists())
-            .andExpect(jsonPath("body[0]").value("MAJOR3"))
-            .andExpect(jsonPath("body[1]").value("MAJOR4"))
+            .andExpect(jsonPath("body[0]").value("WELFARE"))
+            .andExpect(jsonPath("body[1]").value("CHINESE"))
             .andDo(document("change-majors"));
     }
 }

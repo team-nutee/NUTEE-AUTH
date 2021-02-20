@@ -9,6 +9,8 @@ import kr.nutee.auth.dto.response.RefreshResponse;
 import kr.nutee.auth.dto.response.UserData;
 import kr.nutee.auth.domain.*;
 import kr.nutee.auth.enums.ErrorCode;
+import kr.nutee.auth.enums.Interest;
+import kr.nutee.auth.enums.Major;
 import kr.nutee.auth.exception.ConflictException;
 import kr.nutee.auth.jwt.JwtGenerator;
 import kr.nutee.auth.repository.MemberRepository;
@@ -239,6 +241,12 @@ public class AuthService {
         if (signupDTO.getNickname().length()>NICKNAME_LENGTH_LIMIT) {
             throw new IllegalArgumentException("12자를 초과하는 닉네임을 사용할 수 없습니다.");
         }
+        if (!checkMajor(signupDTO.getMajors())) {
+            throw new IllegalArgumentException("해당하는 전공이 없습니다.");
+        }
+        if (!checkInterest(signupDTO.getInterests())) {
+            throw new IllegalArgumentException("해당하는 관심주제 카테고리가 없습니다.");
+        }
 
         String password = bcryptEncoder.encode(signupDTO.getPassword());
         Member member = Member.builder()
@@ -259,6 +267,28 @@ public class AuthService {
                 .interests(member.getInterests())
                 .majors(member.getMajors())
                 .build();
+    }
+
+    private boolean checkMajor(List<String> majors) {
+        for (String major : majors) {
+            for (Major value : Major.values()) {
+                if (value.major.equals(major)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkInterest(List<String> interests) {
+        for (String interest : interests) {
+            for (Interest value : Interest.values()) {
+                if (value.interest.equals(interest)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public Boolean checkOtp(String otp){

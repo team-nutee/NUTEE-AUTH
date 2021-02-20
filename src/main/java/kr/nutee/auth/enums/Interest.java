@@ -1,7 +1,5 @@
 package kr.nutee.auth.enums;
 
-import java.util.List;
-
 public enum Interest {
     FREE("FREE"),
     DORMITORY("DORMITORY"),
@@ -14,11 +12,18 @@ public enum Interest {
     PROMOTION("PROMOTION"),
     ANIMAL("ANIMAL"),
     CERTIFICATE("CERTIFICATE(");
+    public String interest;
 
     Interest(String interest) {
+        this.interest = interest;
     }
 
-    public static List<Interest> getAllInterests() {
-        return List.of(FREE,DORMITORY,FOOD,LOVE,TRIP,JOB,MARKET,STUDY,PROMOTION,ANIMAL,CERTIFICATE);
+    public boolean contains(String interest) {
+        for (Interest value : Interest.values()) {
+            if (value.interest.equals(interest)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

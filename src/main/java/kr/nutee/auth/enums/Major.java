@@ -1,7 +1,5 @@
 package kr.nutee.auth.enums;
 
-import java.util.List;
-
 public enum Major {
     SOCIOLOGY("SOCIOLOGY"),
     SOCIAL_SCIENCE("SOCIAL_SCIENCE"),
@@ -22,14 +20,10 @@ public enum Major {
     MEDIA_CONTENTS("MEDIA_CONTENTS"),
     JOURNALISM("JOURNALISM"),
     DIGITAL_CONTENTS("DIGITAL_CONTENTS");
+    public String major;
 
     Major(String major) {
+        this.major = major;
     }
 
-    public static List<Major> getAllMajors() {
-        return List
-            .of(SOCIOLOGY, SOCIAL_SCIENCE, ECONOMY, POLITICS, BUSINESS_ADMIN, WELFARE, IT, INFO_COM,
-                SOFTWARE, COMPUTER_SCIENCE, GLOCAL_IT, HUMANITIES, ENGLISH, JAPANESE, CHINESE,
-                MISSION, MEDIA_CONTENTS, JOURNALISM, DIGITAL_CONTENTS);
-    }
 }
