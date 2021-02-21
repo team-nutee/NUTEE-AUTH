@@ -7,6 +7,8 @@ import kr.nutee.auth.domain.Member;
 import kr.nutee.auth.dto.request.ChangePasswordRequest;
 import kr.nutee.auth.dto.request.LoginDTO;
 import kr.nutee.auth.enums.ErrorCode;
+import kr.nutee.auth.enums.Interest;
+import kr.nutee.auth.enums.Major;
 import kr.nutee.auth.enums.RoleType;
 import kr.nutee.auth.exception.NotAllowedException;
 import kr.nutee.auth.repository.MemberRepository;
@@ -82,6 +84,9 @@ public class MemberService {
     }
 
     public List<String> changeInterests(Member member, List<String> interests) {
+        if (!checkInterest(interests)) {
+            throw new IllegalArgumentException("해당하는 관심주제 카테고리가 없습니다.");
+        }
         Member target = memberRepository.findMemberById(member.getId());
         target.setInterests(interests);
         Member updatedMember = memberRepository.save(target);
@@ -90,6 +95,9 @@ public class MemberService {
     }
 
     public List<String> changeMajors(Member member, List<String> majors) {
+        if (!checkMajor(majors)) {
+            throw new IllegalArgumentException("해당하는 전공이 없습니다.");
+        }
         Member target = memberRepository.findMemberById(member.getId());
         target.setMajors(majors);
         Member updatedMember = memberRepository.save(target);
@@ -139,6 +147,28 @@ public class MemberService {
             return true;
         }
         return memberRepository.findMemberBySchoolEmail(email) == null;
+    }
+
+    private boolean checkMajor(List<String> majors) {
+        for (String major : majors) {
+            for (Major value : Major.values()) {
+                if (value.major.equals(major)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkInterest(List<String> interests) {
+        for (String interest : interests) {
+            for (Interest value : Interest.values()) {
+                if (value.interest.equals(interest)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
