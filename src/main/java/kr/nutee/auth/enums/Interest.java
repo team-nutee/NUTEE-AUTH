@@ -1,17 +1,20 @@
 package kr.nutee.auth.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum Interest {
-    FREE("FREE"),
-    DORMITORY("DORMITORY"),
-    FOOD("FOOD"),
-    LOVE("LOVE"),
-    TRIP("TRIP"),
-    JOB("JOB"),
-    MARKET("MARKET"),
-    STUDY("STUDY"),
-    PROMOTION("PROMOTION"),
-    ANIMAL("ANIMAL"),
-    CERTIFICATE("CERTIFICATE(");
+    FREE("자유"),
+    DORMITORY("기숙사"),
+    FOOD("음식"),
+    LOVE("연애"),
+    TRIP("여행"),
+    JOB("취업"),
+    MARKET("장터"),
+    STUDY("스터디"),
+    PROMOTION("홍보"),
+    ANIMAL("반려동물"),
+    CERTIFICATE("자격증");
     public String interest;
 
     Interest(String interest) {
