@@ -258,7 +258,7 @@ class MemberControllerTest extends BaseControllerTest {
     @DisplayName("전공 변경 성공")
     void changeMemberMajors() throws Exception {
         //given
-        List<String> majors = List.of("WELFARE","CHINESE");
+        List<String> majors = List.of("사회복지학","중어중국학");
         ChangeMajorsRequest body = ChangeMajorsRequest.builder()
             .majors(majors)
             .build();
@@ -279,8 +279,8 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("code").exists())
             .andExpect(jsonPath("message").exists())
             .andExpect(jsonPath("body").exists())
-            .andExpect(jsonPath("body[0]").value("WELFARE"))
-            .andExpect(jsonPath("body[1]").value("CHINESE"))
+            .andExpect(jsonPath("body[0]").value("사회복지학"))
+            .andExpect(jsonPath("body[1]").value("중어중국학"))
             .andDo(document("change-majors"));
     }
 }
