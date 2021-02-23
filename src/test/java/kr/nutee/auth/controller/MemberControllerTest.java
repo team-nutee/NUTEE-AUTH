@@ -48,10 +48,10 @@ class MemberControllerTest extends BaseControllerTest {
         jsonPath("body.id").exists(),
         jsonPath("body.nickname").value("moon1"),
         jsonPath("body.profileUrl").isEmpty(),
-        jsonPath("body.interests[0]").value("FREE"),
-        jsonPath("body.interests[1]").value("FOOD"),
-        jsonPath("body.majors[0]").value("IT"),
-        jsonPath("body.majors[1]").value("ENGLISH")
+        jsonPath("body.interests[0]").value("자유"),
+        jsonPath("body.interests[1]").value("음식"),
+        jsonPath("body.majors[0]").value("IT융합자율학부"),
+        jsonPath("body.majors[1]").value("영어학")
     );
 
     @BeforeEach
@@ -60,9 +60,9 @@ class MemberControllerTest extends BaseControllerTest {
         mongoTemplate.dropCollection("otps");
         mongoTemplate.dropCollection("database_sequences");
 
-        List<String> interests = List.of("FREE", "FOOD");
+        List<String> interests = List.of("자유", "음식");
 
-        List<String> majors = List.of("IT", "ENGLISH");
+        List<String> majors = List.of("IT융합자율학부", "영어학");
 
         SignupDTO body = SignupDTO.builder()
             .userId("mf0001")
@@ -227,7 +227,7 @@ class MemberControllerTest extends BaseControllerTest {
     @DisplayName("흥미 변경 성공")
     void changeMemberInterests() throws Exception {
         //given
-        List<String> interests = List.of("ANIMAL","STUDY");
+        List<String> interests = List.of("여행","연애");
         ChangeInterestsRequest body = ChangeInterestsRequest.builder()
             .interests(interests)
             .build();
@@ -248,8 +248,8 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("code").exists())
             .andExpect(jsonPath("message").exists())
             .andExpect(jsonPath("body").exists())
-            .andExpect(jsonPath("body[0]").value("ANIMAL"))
-            .andExpect(jsonPath("body[1]").value("STUDY"))
+            .andExpect(jsonPath("body[0]").value("여행"))
+            .andExpect(jsonPath("body[1]").value("연애"))
             .andDo(document("change-interests"));
     }
 
