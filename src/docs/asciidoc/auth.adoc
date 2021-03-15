@@ -375,3 +375,33 @@ include::{snippets}/change-majors/http-request.adoc[]
 [[http-response]]
 ==== http-response
 include::{snippets}/change-majors/http-response.adoc[]
+
+
+
+[[resources-find-id]]
+=== 아이디 찾기
+
+`GET` 요청을 사용해서 id를 찾을 수 있다.
+
+[[http-request]]
+==== http-request
+include::{snippets}/find-id/http-request.adoc[]
+
+[[http-response]]
+==== http-response
+include::{snippets}/find-id/http-response.adoc[]
+
+
+
+[[resources-find-password]]
+=== 비밀번호 찾기
+
+`GET` 요청을 사용해서 id를 찾을 수 있다.
+
+[[http-request]]
+==== http-request
+include::{snippets}/find-password/http-request.adoc[]
+
+[[http-response]]
+==== http-response
+include::{snippets}/find-password/http-response.adoc[]
