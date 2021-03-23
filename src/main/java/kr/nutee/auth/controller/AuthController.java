@@ -229,8 +229,8 @@ public class AuthController {
         내용 : 아이디 찾기
     */
     @GetMapping(path = "/user-id")
-    public ResponseEntity<Object> findId(@RequestBody FindIdRequest body) {
-        String userId = authService.findId(body.getSchoolEmail()).getUserId();
+    public ResponseEntity<Object> findId(@RequestParam String schoolEmail) {
+        String userId = authService.findId(schoolEmail).getUserId();
 
         Response response = Response.builder()
                 .code(10)

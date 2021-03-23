@@ -428,14 +428,11 @@ class AuthControllerTest extends BaseControllerTest {
         //given
         String schoolEmail = "mf0001@gmail.com";
         String userId = "mf0001";
-        FindIdRequest body = FindIdRequest.builder()
-                .schoolEmail(schoolEmail)
-                .build();
         //when
         MockHttpServletRequestBuilder builder = get("/auth/user-id")
                 .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(body));
+                .param("schoolEmail",schoolEmail)
+                .accept(MediaTypes.HAL_JSON_VALUE);
 
         //then
         mockMvc.perform(builder)
@@ -449,9 +446,6 @@ class AuthControllerTest extends BaseControllerTest {
                 .andDo(document("find-id",
                         links(
                                 linkWithRel("self").description("link to self")
-                        ),
-                        requestFields(
-                                fieldWithPath("schoolEmail").description("user's email(not null)")
                         ),
                         responseFields(
                                 fieldWithPath("code").description("label code number"),
