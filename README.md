@@ -1,5 +1,10 @@
 # NUTEE-AUTH
+## NUTEE 구조도
 ![NUTEE 구조도](https://user-images.githubusercontent.com/47442178/108618442-96779080-7461-11eb-819e-c8dd855a8070.jpg)
+
+## AUTH Server 구조도
+![AUTH 구조도](https://user-images.githubusercontent.com/47442178/112944378-b3dd0000-916d-11eb-8a34-be4ca74d2e30.png)
+
 ### 서비스 주요 기능
 - NUTEE 통합 서비스의 사용자 계정 관련 API 제공   
 - NUTEE 통합 서비스의 인증 API 제공
