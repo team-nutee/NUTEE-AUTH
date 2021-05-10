@@ -1,6 +1,8 @@
 jwt:
   secret: nutee
 spring:
+  config:
+    use-legacy-processing: true
   application:
     name: auth
   profiles:
