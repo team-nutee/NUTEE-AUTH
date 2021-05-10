@@ -8,3 +8,9 @@ spring:
   cloud:
     config:
       uri: http://3.34.61.71:8888
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone : http://127.0.0.1:8761/eureka
