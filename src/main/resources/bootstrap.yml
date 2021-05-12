@@ -6,11 +6,13 @@ spring:
   application:
     name: auth
   profiles:
-    active: dev
+    active: local
   cloud:
     config:
       uri: http://3.34.61.71:8888
 eureka:
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
   client:
     register-with-eureka: true
     fetch-registry: true
